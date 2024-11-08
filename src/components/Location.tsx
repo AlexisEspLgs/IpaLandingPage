@@ -13,7 +13,7 @@ const icon = new L.Icon({
   shadowSize: [41, 41]
 })
 
-export function Location() {
+export default function Location() {
   const position: L.LatLngExpression = [-37.457536, -72.482402] // Coordenadas de la iglesia
 
   useEffect(() => {
@@ -27,11 +27,11 @@ export function Location() {
   }, [])
 
   return (
-    <section id="ubicacion" className="py-20 bg-gray scroll-offset">
+    <section id="ubicacion" className="py-20 bg-background">
       <div className="container mx-auto">
         <h2 className="text-3xl font-bold text-center mb-8 text-primary">Nuestra Ubicación</h2>
-        <div className="w-full max-w-4xl mx-auto rounded-lg  shadow-lg">
-          <MapContainer center={position} zoom={15} scrollWheelZoom={false} style={{ height: '350px', width: 'auto', position:'sticky' }}>
+        <div className="w-full max-w-4xl mx-auto rounded-lg overflow-hidden shadow-lg">
+          <MapContainer center={position} zoom={15} scrollWheelZoom={false} style={{ height: '400px', width: '100%' }}>
             <TileLayer
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
