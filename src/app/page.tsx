@@ -14,14 +14,21 @@ import { NewsPopup } from '@/components/NewsPopup';
 import Blog from '@/components/Blog';
 
 export default function Home() {
-
   const [activeSection, setActiveSection] = useState('inicio');
   const navItems = ['inicio', 'fotos', 'historia', 'ubicacion', 'ipalee', 'tiktok', 'contacto'];
   const sectionRefs = useRef<{ [key: string]: HTMLElement | null }>({});
+  
+  // Esto es para asegurarnos de que se ejecute solo en el cliente
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      // Solo se ejecuta en el cliente, donde `window` está disponible
+    // Este useEffect se ejecutará solo en el cliente
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    if (isClient) {
+      // Solo ejecutar el código de referencia a 'window' en el cliente
       navItems.forEach(item => {
         sectionRefs.current[item.toLowerCase()] = document.getElementById(item.toLowerCase());
       });
@@ -41,11 +48,10 @@ export default function Home() {
       window.addEventListener('scroll', handleScroll);
       return () => window.removeEventListener('scroll', handleScroll);
     }
-  }, [navItems]);
+  }, [isClient, navItems]);
 
   const scrollToSection = (sectionId: string) => {
-    if (typeof window !== 'undefined') {
-      // Solo se ejecuta en el cliente
+    if (isClient) {
       const section = sectionRefs.current[sectionId];
       if (section) {
         const yOffset = -64; // Ajuste del desplazamiento para que coincida con la altura del navbar
