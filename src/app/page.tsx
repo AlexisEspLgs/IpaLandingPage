@@ -1,4 +1,4 @@
-'use client';
+'use client'
 
 import { useEffect, useState, useRef } from 'react';
 import { Inicio } from '../components/Inicio';
@@ -14,21 +14,15 @@ import { NewsPopup } from '@/components/NewsPopup';
 import Blog from '@/components/Blog';
 
 export default function Home() {
+
   const [activeSection, setActiveSection] = useState('inicio');
   const navItems = ['inicio', 'fotos', 'historia', 'ubicacion', 'ipalee', 'tiktok', 'contacto'];
   const sectionRefs = useRef<{ [key: string]: HTMLElement | null }>({});
-  
-  // Esto es para asegurarnos de que se ejecute solo en el cliente
-  const [isClient, setIsClient] = useState(false);
 
+  // Mover la lógica de scroll a useEffect para asegurar que se ejecute en el cliente
   useEffect(() => {
-    // Este useEffect se ejecutará solo en el cliente
-    setIsClient(true);
-  }, []);
-
-  useEffect(() => {
-    if (isClient) {
-      // Solo ejecutar el código de referencia a 'window' en el cliente
+    // Verificar que `window` esté disponible antes de ejecutar el código
+    if (typeof window !== 'undefined') {
       navItems.forEach(item => {
         sectionRefs.current[item.toLowerCase()] = document.getElementById(item.toLowerCase());
       });
@@ -48,10 +42,11 @@ export default function Home() {
       window.addEventListener('scroll', handleScroll);
       return () => window.removeEventListener('scroll', handleScroll);
     }
-  }, [isClient, navItems]);
+  }, [navItems]);
 
   const scrollToSection = (sectionId: string) => {
-    if (isClient) {
+    // Verificar si `window` está definido antes de ejecutar
+    if (typeof window !== 'undefined') {
       const section = sectionRefs.current[sectionId];
       if (section) {
         const yOffset = -64; // Ajuste del desplazamiento para que coincida con la altura del navbar
