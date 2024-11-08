@@ -2,36 +2,52 @@
 
 import { useState } from 'react'
 import { Send } from 'lucide-react'
+import emailjs from 'emailjs-com'
+import Swal from 'sweetalert2'
 
 export function ContactForm() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [message, setMessage] = useState('')
-  const [status, setStatus] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setStatus('Enviando...')
 
     try {
-      const response = await fetch('/api/send-email', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      await emailjs.send(
+        'your_service_id', // Reemplaza con tu service ID de EmailJS
+        'your_template_id', // Reemplaza con tu template ID de EmailJS
+        {
+          user_name: name,
+          user_email: email,
+          message: message,
         },
-        body: JSON.stringify({ name, email, message }),
+        'your_user_id' // Reemplaza con tu user ID de EmailJS
+      )
+
+      Swal.fire({
+        title: '¡Mensaje enviado!',
+        text: '¡Que Dios te bendiga! Hemos recibido tu mensaje.',
+        icon: 'success',
+        confirmButtonText: 'Cerrar',
+        customClass: {
+          confirmButton: 'bg-primary text-white rounded-lg px-6 py-2',
+        },
       })
 
-      if (response.ok) {
-        setStatus('¡Mensaje enviado con éxito! Que Dios te bendiga.')
-        setName('')
-        setEmail('')
-        setMessage('')
-      } else {
-        setStatus('Hubo un error al enviar el mensaje. Por favor, intenta de nuevo.')
-      }
+      setName('')
+      setEmail('')
+      setMessage('')
     } catch (error) {
-      setStatus('Hubo un error al enviar el mensaje. Por favor, intenta de nuevo.')
+      Swal.fire({
+        title: 'Error',
+        text: 'Hubo un error al enviar el mensaje. Por favor, intenta de nuevo.',
+        icon: 'error',
+        confirmButtonText: 'Cerrar',
+        customClass: {
+          confirmButton: 'bg-primary text-white rounded-lg px-6 py-2',
+        },
+      })
       console.log(error)
     }
   }
@@ -87,7 +103,6 @@ export function ContactForm() {
               <Send className="mr-2" size={18} />
               Enviar Mensaje
             </button>
-            {status && <p className="mt-4 text-center text-sm font-medium text-gray-700">{status}</p>}
           </form>
         </div>
       </div>
