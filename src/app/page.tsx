@@ -20,34 +20,38 @@ export default function Home() {
   const sectionRefs = useRef<{ [key: string]: HTMLElement | null }>({});
 
   useEffect(() => {
-    navItems.forEach(item => {
-      sectionRefs.current[item.toLowerCase()] = document.getElementById(item.toLowerCase());
-    });
-  }, [navItems]);
+    if (typeof window !== 'undefined') {
+      // Solo se ejecuta en el cliente, donde `window` está disponible
+      navItems.forEach(item => {
+        sectionRefs.current[item.toLowerCase()] = document.getElementById(item.toLowerCase());
+      });
 
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      const sections = navItems.map(item => item.toLowerCase());
-      for (let i = sections.length - 1; i >= 0; i--) {
-        const section = sectionRefs.current[sections[i]];
-        if (section && section.offsetTop <= currentScrollY + 100) {
-          setActiveSection(sections[i]);
-          break;
+      const handleScroll = () => {
+        const currentScrollY = window.scrollY;
+        const sections = navItems.map(item => item.toLowerCase());
+        for (let i = sections.length - 1; i >= 0; i--) {
+          const section = sectionRefs.current[sections[i]];
+          if (section && section.offsetTop <= currentScrollY + 100) {
+            setActiveSection(sections[i]);
+            break;
+          }
         }
-      }
-    };
+      };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+      window.addEventListener('scroll', handleScroll);
+      return () => window.removeEventListener('scroll', handleScroll);
+    }
   }, [navItems]);
 
   const scrollToSection = (sectionId: string) => {
-    const section = sectionRefs.current[sectionId];
-    if (section) {
-      const yOffset = -64; // Ajuste del desplazamiento para que coincida con la altura del navbar
-      const y = section.getBoundingClientRect().top + window.pageYOffset + yOffset;
-      window.scrollTo({ top: y, behavior: 'smooth' });
+    if (typeof window !== 'undefined') {
+      // Solo se ejecuta en el cliente
+      const section = sectionRefs.current[sectionId];
+      if (section) {
+        const yOffset = -64; // Ajuste del desplazamiento para que coincida con la altura del navbar
+        const y = section.getBoundingClientRect().top + window.pageYOffset + yOffset;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      }
     }
   };
 
