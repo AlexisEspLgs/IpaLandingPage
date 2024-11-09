@@ -23,7 +23,7 @@ export function Navbar({ activeSection, navItems, onNavItemClick }: NavbarProps)
   }, []);
 
   return (
-    <header className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${scrolled ? 'bg-primary shadow-lg' : 'bg-transparent'}`}>
+    <header className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${scrolled ? 'bg-primary shadow-lg' : 'bg-white md:bg-transparent'}`}>
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center py-4">
           <div className="flex items-center">
@@ -65,7 +65,7 @@ export function Navbar({ activeSection, navItems, onNavItemClick }: NavbarProps)
         </div>
 
         {menuOpen && (
-          <nav className="md:hidden py-4">
+          <nav className="md:hidden py-4 bg-white">
             {navItems.map((item) => (
               <button
                 key={item}
@@ -76,7 +76,7 @@ export function Navbar({ activeSection, navItems, onNavItemClick }: NavbarProps)
                 className={`block w-full text-left px-3 py-2 rounded-md transition-colors duration-300 ${
                   activeSection === item.toLowerCase()
                     ? 'bg-secondary text-white'
-                    : 'text-white hover:bg-secondary'
+                    : 'text-primary hover:bg-secondary hover:text-white'
                 }`}
               >
                 {item}

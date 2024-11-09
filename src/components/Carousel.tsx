@@ -7,9 +7,9 @@ import 'slick-carousel/slick/slick.css'
 import 'slick-carousel/slick/slick-theme.css'
 
 const photos = [
-  { id: 1, src: '/EncuentroMujeres.jpg', alt: 'Encuentro de Mujeres' },
-  { id: 2, src: '/EncuentroMujeres.jpg', alt: 'Foto 2' },
-  { id: 3, src: '/EncuentroMujeres.jpg', alt: 'Foto 3' },
+  { id: 1, src: '/encuentromujeres.webp', alt: 'Encuentro de Mujeres' },
+  { id: 2, src: '/encuentromujeres.webp', alt: 'Foto 2' },
+  { id: 3, src: '/encuentromujeres.webp', alt: 'Foto 3' },
 ]
 
 export function Carousel() {
@@ -37,9 +37,8 @@ export function Carousel() {
                 <Image
                   src={photo.src}
                   alt={photo.alt}
-                  layout="fill"
-                  objectFit="cover"
-                  className="rounded-lg"
+                  fill
+                  className="object-cover" 
                 />
               </div>
             ))}

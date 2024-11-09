@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import React, { useRef, useEffect, useState } from 'react';
 import { AiFillTikTok } from 'react-icons/ai';
@@ -6,48 +6,45 @@ import { AiFillTikTok } from 'react-icons/ai';
 const tiktokVideos = [
   {
     videoId: '7421320535474195717',
-    thumbnailUrl: 'https://p16-sign-va.tiktokcdn.com/tos-maliva-p-0068/ooK9WDQffAE4ajbvABRm07Bb0iBJiEPNEuqIY6~tplv-photomode-zoomcover:720:720.jpeg?lk3s=81f88b70&x-expires=1731081600&x-signature=t0JBjXMdrDZDcNiaW1Ti6%2FjMwtM%3D&shp=81f88b70&shcp=-',
+    thumbnailUrl: 'https://p16-sign-va.tiktokcdn.com/obj/tos-maliva-p-0068/098fd82a736840e2a259fe36314e16ac_1727910851?lk3s=81f88b70&x-expires=1731340800&x-signature=VonwhOsSUFaeIx8zYELnUtCa3Xs%3D&shp=81f88b70&shcp=-',
     title: 'Video de TikTok de IPA Las Encinas',
   },
   {
     videoId: '7416116376856808710',
-    thumbnailUrl: 'https://p16-sign-va.tiktokcdn.com/obj/tos-maliva-p-0068/e7d20047d0e64c8184c4db638c3539a9_1726699188?lk3s=81f88b70&x-expires=1731081600&x-signature=da1iXPSp81170kl%2BNAkoHmql7HQ%3D&shp=81f88b70&shcp=-',
-    title: 'Video de TikTok de IPA Las Encinas',    
+    thumbnailUrl: 'https://p16-sign-va.tiktokcdn.com/tos-maliva-p-0068/ocXMfroIqhIo1jpNAOBQjVxLWe77OtISCGkCgf~tplv-photomode-zoomcover:720:720.avif?lk3s=81f88b70&x-expires=1731340800&x-signature=I1nwS%2Bn3DsNp8dnCFmGN1SuE8jQ%3D&shp=81f88b70&shcp=-',
+    title: 'Video de TikTok de IPA Las Encinas',
   },
   {
     videoId: '7420943763733826822',
-    thumbnailUrl: 'https://p16-sign-va.tiktokcdn.com/tos-maliva-p-0068/bd866c6c58034b2480a9e27cf897ddb6_1727823134~tplv-photomode-zoomcover:720:720.jpeg?lk3s=81f88b70&x-expires=1731081600&x-signature=CpEBFGnrpxPSurvCPYzfVIW7krQ%3D&shp=81f88b70&shcp=-',
+    thumbnailUrl: 'https://p16-sign-va.tiktokcdn.com/obj/tos-maliva-p-0068/09529e8e2ab84df0abe19f2d23d67d7d_1727823134?lk3s=81f88b70&x-expires=1731340800&x-signature=G0z1xeENj5YXRFG5iN0P4Lekc54%3D&shp=81f88b70&shcp=-',
     title: 'Video de TikTok de IPA Las Encinas',
   },
 ];
 
 export function TikTokFeed() {
   const [activeVideoId, setActiveVideoId] = useState<string | null>(null);
-  const iframeRefs = useRef<Map<string, HTMLIFrameElement>>(new Map());
-
+  const iframeRef = useRef<HTMLIFrameElement | null>(null);
+  
   const handleVideoClick = (videoId: string) => {
     setActiveVideoId(videoId);
   };
 
-  const createIframeSrc = (videoId: string) => {
-    return `https://www.tiktok.com/embed/v2/${videoId}`;
-  };
-
   useEffect(() => {
-    if (activeVideoId) {
-      const iframeEl = iframeRefs.current.get(activeVideoId);
-      if (iframeEl) {
-        const messageHandler = (event: MessageEvent) => {
-          if (
-            event.origin === 'https://www.tiktok.com' &&
-            event.data.type === 'video-play'
-          ) {
-            // Video started playing
-          }
-        };
-        window.addEventListener('message', messageHandler);
-        return () => window.removeEventListener('message', messageHandler);
-      }
+    if (activeVideoId && iframeRef.current) {
+      const messageHandler = (event: MessageEvent) => {
+        if (
+          event.origin === 'https://www.tiktok.com' &&
+          event.data.type === 'onPlayerReady'
+        ) {
+          iframeRef.current?.contentWindow?.postMessage(
+            { type: 'unMute', 'x-tiktok-player': true },
+            '*'
+          );
+        }
+      };
+
+      window.addEventListener('message', messageHandler);
+      return () => window.removeEventListener('message', messageHandler);
     }
   }, [activeVideoId]);
 
@@ -88,22 +85,14 @@ export function TikTokFeed() {
             >
               {activeVideoId === video.videoId ? (
                 <iframe
-                  ref={(el) => {
-                    if (el) {
-                      iframeRefs.current.set(video.videoId, el);
-                    } else {
-                      iframeRefs.current.delete(video.videoId);
-                    }
-                  }}
-                  src={createIframeSrc(video.videoId)}
+                  ref={iframeRef}
+                  src={`https://www.tiktok.com/player/v1/${video.videoId}?autoplay=1`}
                   className="rounded-2xl w-full h-full"
                   allowFullScreen
-                  allow="autoplay; encrypted-media; gyroscope; picture-in-picture"
+                  allow='accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; transparency'
                 ></iframe>
               ) : (
-                <div
-                  className="absolute inset-0 flex items-center justify-center"
-                >
+                <div className="absolute inset-0 flex items-center justify-center">
                   <div className="w-16 h-16 bg-white bg-opacity-75 rounded-full flex items-center justify-center">
                     <svg className="w-8 h-8 text-black" fill="currentColor" viewBox="0 0 20 20">
                       <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" fillRule="evenodd"></path>

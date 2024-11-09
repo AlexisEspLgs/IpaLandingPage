@@ -30,7 +30,7 @@ export function Historia() {
         >
           <div className="overflow-hidden rounded-lg shadow-lg">
             <Image
-              src="/EncuentroMujeres.jpg"
+              src="/encuentromujeres.webp"
               alt="Historia de IPA Las Encinas"
               width={600}
               height={400}
