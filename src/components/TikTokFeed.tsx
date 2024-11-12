@@ -34,11 +34,11 @@ export function TikTokFeed() {
       const messageHandler = (event: MessageEvent) => {
         if (
           event.origin === 'https://www.tiktok.com' &&
-          event.data.type === 'onPlayerReady'
+          event.data?.type === 'onPlayerReady'
         ) {
           iframeRef.current?.contentWindow?.postMessage(
             { type: 'unMute', 'x-tiktok-player': true },
-            '*'
+            'https://www.tiktok.com' // dominio específico
           );
         }
       };
@@ -72,16 +72,14 @@ export function TikTokFeed() {
         </div>
         <div className="flex flex-wrap justify-center gap-4">
           {tiktokVideos.map((video) => (
-            <div
+            <button
               key={video.videoId}
-              className="rounded-[16px] h-[475px] w-80 snap-center bg-black relative shrink-0 cursor-pointer bg-center bg-[length:100%] hover:bg-[length:105%] transition-[background-size]"
+              className="rounded-[16px] h-[475px] md:h-[400px] w-80 md:w-64 snap-center bg-black relative shrink-0 cursor-pointer transition-transform hover:scale-105"
               onClick={() => handleVideoClick(video.videoId)}
-              role="button"
-              tabIndex={0}
               style={{
                 backgroundImage: activeVideoId !== video.videoId ? `url(${video.thumbnailUrl})` : 'unset',
               }}
-              aria-label="Reproducir video"
+              aria-label={`Reproducir ${video.title}`}
             >
               {activeVideoId === video.videoId ? (
                 <iframe
@@ -94,13 +92,13 @@ export function TikTokFeed() {
               ) : (
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="w-16 h-16 bg-white bg-opacity-75 rounded-full flex items-center justify-center">
-                    <svg className="w-8 h-8 text-black" fill="currentColor" viewBox="0 0 20 20">
+                    <svg className="w-8 h-8 text-black" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                       <path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" fillRule="evenodd"></path>
                     </svg>
                   </div>
                 </div>
               )}
-            </div>
+            </button>
           ))}
         </div>
       </div>
