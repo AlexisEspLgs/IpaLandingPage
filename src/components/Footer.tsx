@@ -20,6 +20,7 @@ export function Footer() {
             <p className="text-gray-400">Email: info@ipalasencinas.com</p>
           </div>
         </div>
+        
         <div className="mt-8 flex justify-center space-x-6">
           <a href="https://m.facebook.com/profile.php?id=100025751512723&_rdr" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="text-gray-400 hover:text-secondary transition-colors">
             <FaFacebook size={24} />
@@ -31,10 +32,11 @@ export function Footer() {
             <FaTiktok size={24} />
           </a>
         </div>
+        
         <div className="mt-8 text-center text-gray-500">
           <p>&copy; {new Date().getFullYear()} IPA Las Encinas. Todos los derechos reservados.</p>
         </div>
       </div>
     </footer>
-  )
+  );
 }

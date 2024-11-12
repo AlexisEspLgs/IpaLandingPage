@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import Image from 'next/image';
 import { useState, useEffect, useCallback } from 'react';
@@ -18,11 +18,11 @@ const blogPosts: BlogPostType[] = [
     id: 1,
     title: 'Titulo Noticia Blog',
     content: `<h2>PruebaContenido</h2>
-    <p>PrebaSub Titulo</p>
-    <ol>
-      <li>prueba texto </li>
-    </ol>
-    <p>Parrafo.</p>`,
+      <p>PrebaSub Titulo</p>
+      <ol>
+        <li>prueba texto </li>
+      </ol>
+      <p>Parrafo.</p>`,
     images: ['/ipale2.jpg', '/ipale.jpg', '/ipale3.jpg'],
     date: '2023-05-15',
   },
@@ -65,8 +65,8 @@ function ImageCarousel({ images, inModal = false }: { images: string[], inModal?
   }, [nextSlide, isHovered]);
 
   return (
-    <div 
-      className={`relative overflow-hidden ${inModal ? 'w-full h-[50vh]' : 'w-full h-48'}`}
+    <div
+      className={`relative overflow-hidden ${inModal ? 'w-full h-[50vh]' : 'w-full h-48 sm:h-64 md:h-72 lg:h-80'}`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -84,7 +84,7 @@ function ImageCarousel({ images, inModal = false }: { images: string[], inModal?
             src={images[currentIndex]}
             alt={`Blog image ${currentIndex + 1}`}
             layout="fill"
-            objectFit="contain"
+            objectFit="cover"
             className="bg-gray-100"
           />
         </motion.div>
@@ -123,8 +123,8 @@ export default function Blog() {
   };
 
   return (
-    <section id="blog" className="py-20 bg-background">
-      <div className="container mx-auto px-4">
+    <section id="blog" className="py-20 bg-background px-2 sm:px-4">
+      <div className="container mx-auto">
         <h2 className="text-3xl font-bold text-center mb-12 text-primary">Últimos Artículos</h2>
         <div className="grid gap-8 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           {blogPosts.map((post) => (
@@ -166,7 +166,7 @@ export default function Blog() {
               initial={{ y: 50, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 50, opacity: 0 }}
-              className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+              className="bg-white rounded-lg p-6 max-w-2xl w-full sm:max-h-[80vh] lg:max-h-[90vh] overflow-y-auto"
               onClick={(e) => e.stopPropagation()}
             >
               <h2 className="text-2xl font-bold mb-4 text-primary">{selectedPost.title}</h2>

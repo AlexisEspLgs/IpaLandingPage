@@ -1,9 +1,9 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import Image from 'next/image'
-import { X } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { useState } from 'react';
+import Image from 'next/image';
+import { X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const images = [
   { id: 1, src: '/ipale.jpg', alt: 'Ipalee 1' },
@@ -11,10 +11,10 @@ const images = [
   { id: 3, src: '/ipale3.jpg', alt: 'Ipalee 3' },
   { id: 4, src: '/ipale4.jpg', alt: 'Ipalee 4' },
   { id: 5, src: '/ipale5.jpg', alt: 'Ipalee 5' },
-]
+];
 
 export function Ipalee() {
-  const [selectedImage, setSelectedImage] = useState<string | null>(null)
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   return (
     <section id="ipalee" className="py-20 bg-background">
@@ -54,40 +54,43 @@ export function Ipalee() {
             </motion.div>
           ))}
         </div>
-        {selectedImage && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50" 
-            onClick={() => setSelectedImage(null)}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="relative max-w-4xl w-full"
+
+        <AnimatePresence>
+          {selectedImage && (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50" 
+              onClick={() => setSelectedImage(null)}
             >
-              <Image
-                src={selectedImage}
-                alt="Enlarged Ipalee image"
-                width={1200}
-                height={1200}
-                className="max-w-full max-h-[90vh] object-contain rounded-lg"
-              />
-              <button
-                className="absolute top-2 right-2 text-white bg-black bg-opacity-50 p-2 rounded-full hover:bg-opacity-75 transition-colors duration-300"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  setSelectedImage(null)
-                }}
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className="relative max-w-4xl w-full"
               >
-                <X size={24} />
-              </button>
+                <Image
+                  src={selectedImage}
+                  alt="Enlarged Ipalee image"
+                  width={1200}
+                  height={1200}
+                  className="max-w-full max-h-[90vh] object-contain rounded-lg"
+                />
+                <button
+                  className="absolute top-2 right-2 text-white bg-black bg-opacity-50 p-2 rounded-full hover:bg-opacity-75 transition-colors duration-300"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedImage(null);
+                  }}
+                >
+                  <X size={24} />
+                </button>
+              </motion.div>
             </motion.div>
-          </motion.div>
-        )}
+          )}
+        </AnimatePresence>
       </div>
     </section>
-  )
+  );
 }

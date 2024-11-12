@@ -1,5 +1,3 @@
-'use client'
-
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 
@@ -34,7 +32,9 @@ export function Navbar({ activeSection, navItems, onNavItemClick }: NavbarProps)
               height={40}
               className="mr-3 rounded-full"
             />
-            <h1 className={`text-lg md:text-2xl font-bold ${scrolled ? 'text-white' : 'text-primary'}`}>IPA Las Encinas</h1>
+            <h1 className={`text-lg md:text-2xl font-bold ${scrolled ? 'text-white' : 'text-primary'} hidden lg:inline`}>
+              IPA Las Encinas
+            </h1>
           </div>
 
           <nav className="hidden md:flex space-x-6">

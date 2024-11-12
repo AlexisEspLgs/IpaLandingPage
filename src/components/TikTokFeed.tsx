@@ -50,9 +50,9 @@ export function TikTokFeed() {
 
   return (
     <section id="tiktok" className="py-20 bg-background">
-      <div className="container mx-auto">
+      <div className="container mx-auto px-4">
         <div className="bg-gradient-to-r from-primary to-secondary text-white p-6 rounded-lg mb-12 text-center shadow-lg transform transition-all duration-300 hover:scale-105 flex items-center justify-between">
-          <h2 className="text-3xl font-bold">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold">
             <span>Nuestros </span>
             <span className="text-accent">
               {Array.from("TikToks").map((letter, index) => (
@@ -66,15 +66,15 @@ export function TikTokFeed() {
               ))}
             </span>
           </h2>
-          <span className="text-4xl ml-4">
+          <span className="text-3xl sm:text-4xl ml-4">
             <AiFillTikTok className="text-accent transform transition-transform duration-300 hover:scale-110" />
           </span>
         </div>
-        <div className="flex flex-wrap justify-center gap-4">
+        <div className="flex flex-wrap justify-center gap-6 sm:gap-8 lg:gap-12">
           {tiktokVideos.map((video) => (
             <div
               key={video.videoId}
-              className="rounded-[16px] h-[475px] w-80 snap-center bg-black relative shrink-0 cursor-pointer bg-center bg-[length:100%] hover:bg-[length:105%] transition-[background-size]"
+              className="rounded-[16px] h-[300px] sm:h-[375px] lg:h-[475px] w-full sm:w-80 lg:w-96 snap-center bg-black relative shrink-0 cursor-pointer bg-center bg-[length:100%] hover:bg-[length:105%] transition-[background-size]"
               onClick={() => handleVideoClick(video.videoId)}
               role="button"
               tabIndex={0}

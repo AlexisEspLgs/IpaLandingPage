@@ -5,10 +5,10 @@ export function NewsPopup() {
   const [showPopup, setShowPopup] = useState(false);
 
   useEffect(() => {
-    // Espera 10 segundos y luego muestra el popup
+    // Espera 5 segundos y luego muestra el popup
     const timer = setTimeout(() => {
       setShowPopup(true);
-    }, 5000); // 10 segundos
+    }, 5000); // 5 segundos
 
     // Limpiar el timer si el componente se desmonta
     return () => clearTimeout(timer);
@@ -22,7 +22,7 @@ export function NewsPopup() {
     <>
       {showPopup && (
         <div className="fixed top-0 left-0 right-0 bottom-0 flex justify-center items-center z-50 bg-black bg-opacity-50">
-          <div className="bg-white p-4 md:p-8 rounded-lg shadow-lg max-w-lg w-full md:max-w-4xl flex flex-col md:flex-row items-center animate-slide-in">
+          <div className="bg-white p-4 md:p-8 rounded-lg shadow-lg max-w-xs sm:max-w-sm md:max-w-lg lg:max-w-4xl w-full flex flex-col md:flex-row items-center animate-slide-in">
             {/* Logo de la iglesia */}
             <div className="w-full md:w-1/3 flex justify-center mb-4 md:mb-0">
               <Image

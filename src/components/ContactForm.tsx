@@ -1,17 +1,17 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Send } from 'lucide-react'
-import emailjs from 'emailjs-com'
-import Swal from 'sweetalert2'
+import { useState } from 'react';
+import { Send } from 'lucide-react';
+import emailjs from 'emailjs-com';
+import Swal from 'sweetalert2';
 
 export function ContactForm() {
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
-  const [message, setMessage] = useState('')
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [message, setMessage] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     try {
       await emailjs.send(
@@ -23,7 +23,7 @@ export function ContactForm() {
           message: message,
         },
         'your_user_id' // Reemplaza con tu user ID de EmailJS
-      )
+      );
 
       Swal.fire({
         title: '¡Mensaje enviado!',
@@ -33,11 +33,11 @@ export function ContactForm() {
         customClass: {
           confirmButton: 'bg-primary text-white rounded-lg px-6 py-2',
         },
-      })
+      });
 
-      setName('')
-      setEmail('')
-      setMessage('')
+      setName('');
+      setEmail('');
+      setMessage('');
     } catch (error) {
       Swal.fire({
         title: 'Error',
@@ -47,16 +47,18 @@ export function ContactForm() {
         customClass: {
           confirmButton: 'bg-primary text-white rounded-lg px-6 py-2',
         },
-      })
-      console.log(error)
+      });
+      console.log(error);
     }
-  }
+  };
 
   return (
     <section id="contacto" className="py-20 bg-primary">
       <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between">
         <div className="md:w-1/2 mb-8 md:mb-0">
-          <h2 className="text-3xl font-bold text-white mb-4">¡Dios te bendiga! ¿En qué podemos orar por ti?</h2>
+          <h2 className="text-3xl font-bold text-white mb-4">
+            ¡Dios te bendiga! ¿En qué podemos orar por ti?
+          </h2>
           <p className="text-white text-lg">
             Si tienes alguna petición, duda o deseas saber más sobre nuestro ministerio, no dudes en escribirnos. Estamos para servirte en el amor de Cristo.
           </p>
@@ -64,7 +66,9 @@ export function ContactForm() {
         <div className="md:w-1/2 max-w-md w-full">
           <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow-lg">
             <div className="mb-4">
-              <label htmlFor="name" className="block mb-2 text-sm font-medium text-gray-700">Nombre</label>
+              <label htmlFor="name" className="block mb-2 text-sm font-medium text-gray-700">
+                Nombre
+              </label>
               <input
                 type="text"
                 id="name"
@@ -75,7 +79,9 @@ export function ContactForm() {
               />
             </div>
             <div className="mb-4">
-              <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-700">Correo Electrónico</label>
+              <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-700">
+                Correo Electrónico
+              </label>
               <input
                 type="email"
                 id="email"
@@ -86,7 +92,9 @@ export function ContactForm() {
               />
             </div>
             <div className="mb-4">
-              <label htmlFor="message" className="block mb-2 text-sm font-medium text-gray-700">Mensaje</label>
+              <label htmlFor="message" className="block mb-2 text-sm font-medium text-gray-700">
+                Mensaje
+              </label>
               <textarea
                 id="message"
                 value={message}
@@ -107,5 +115,5 @@ export function ContactForm() {
         </div>
       </div>
     </section>
-  )
+  );
 }

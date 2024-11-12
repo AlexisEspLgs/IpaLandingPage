@@ -1,8 +1,11 @@
-import Image from 'next/image'
+import Image from 'next/image';
 
 export function Inicio() {
   return (
-    <section id="inicio" className="pt-8 bg-gradient-to-r from-primary to-secondary text-white min-h-screen flex items-center">
+    <section
+      id="inicio"
+      className="pt-8 bg-gradient-to-r from-primary to-secondary text-white min-h-screen flex items-center"
+    >
       <div className="container mx-auto text-center px-4">
         <Image
           src="/logo.jpg"
@@ -33,5 +36,5 @@ export function Inicio() {
         </div>
       </div>
     </section>
-  )
+  );
 }
