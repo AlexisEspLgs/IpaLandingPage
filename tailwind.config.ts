@@ -12,6 +12,9 @@ const config: Config = {
         background: "var(--background)",
         foreground: "var(--foreground)",
       },
+      contrast: {
+        120: '1.2', // Define el contraste al 120%
+      },
     },
   },
   plugins: [],

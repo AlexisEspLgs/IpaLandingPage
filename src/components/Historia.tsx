@@ -30,11 +30,11 @@ export function Historia() {
         >
           <div className="overflow-hidden rounded-lg shadow-lg">
             <Image
-              src="/encuentromujeres.webp"
+              src="/historia.webp"
               alt="Historia de IPA Las Encinas"
-              width={600}
-              height={400}
-              className="w-full h-auto transition-transform duration-300 hover:scale-105"
+              width={500}
+              height={350}
+              className="w-full h-auto transition-transform duration-600 hover:scale-105"
             />
           </div>
         </motion.div>

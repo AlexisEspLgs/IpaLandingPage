@@ -6,17 +6,17 @@ import { AiFillTikTok } from 'react-icons/ai';
 const tiktokVideos = [
   {
     videoId: '7421320535474195717',
-    thumbnailUrl: 'https://p16-sign-va.tiktokcdn.com/obj/tos-maliva-p-0068/098fd82a736840e2a259fe36314e16ac_1727910851?lk3s=81f88b70&x-expires=1731340800&x-signature=VonwhOsSUFaeIx8zYELnUtCa3Xs%3D&shp=81f88b70&shcp=-',
+    thumbnailUrl: '/tiktok-thumbnail-3.jpg',
     title: 'Video de TikTok de IPA Las Encinas',
   },
   {
     videoId: '7416116376856808710',
-    thumbnailUrl: 'https://p16-sign-va.tiktokcdn.com/tos-maliva-p-0068/ocXMfroIqhIo1jpNAOBQjVxLWe77OtISCGkCgf~tplv-photomode-zoomcover:720:720.avif?lk3s=81f88b70&x-expires=1731340800&x-signature=I1nwS%2Bn3DsNp8dnCFmGN1SuE8jQ%3D&shp=81f88b70&shcp=-',
+    thumbnailUrl: '/tiktok-thumbnail-1.jpg',
     title: 'Video de TikTok de IPA Las Encinas',
   },
   {
     videoId: '7420943763733826822',
-    thumbnailUrl: 'https://p16-sign-va.tiktokcdn.com/obj/tos-maliva-p-0068/09529e8e2ab84df0abe19f2d23d67d7d_1727823134?lk3s=81f88b70&x-expires=1731340800&x-signature=G0z1xeENj5YXRFG5iN0P4Lekc54%3D&shp=81f88b70&shcp=-',
+    thumbnailUrl: '/tiktok-thumbnail-2.jpg',
     title: 'Video de TikTok de IPA Las Encinas',
   },
 ];

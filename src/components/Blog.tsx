@@ -11,35 +11,57 @@ interface BlogPostType {
   content: string;
   images: string[];
   date: string;
+  hasPDF?: boolean; // Indica si el post tiene un archivo PDF asociado.
 }
 
 const blogPosts: BlogPostType[] = [
   {
     id: 1,
-    title: 'Titulo Noticia Blog',
-    content: `<h2>PruebaContenido</h2>
-      <p>PrebaSub Titulo</p>
-      <ol>
-        <li>prueba texto </li>
-      </ol>
-      <p>Parrafo.</p>`,
-    images: ['/ipale2.jpg', '/ipale.jpg', '/ipale3.jpg'],
-    date: '2023-05-15',
+    title: 'Encuentro Mujeres Apostolicas',
+    content:
+      `<p>Acompáñanos en el Encuentro de Mujeres Apostólicas, 
+      una jornada especial para fortalecer tu fe y disfrutar de la comunión con hermanas en Cristo.
+      El evento contará con alabanzas dirigidas por la Pastora Carmen Chávez, 
+      una inspiradora predicación de la Pastora Irene, y momentos de adoración, como el cántico "A Tus Pies". 
+      Además, habrá un tiempo de ungimiento y una oración final de bendición por parte del Pastor Serafín Cuevas.</p>`,
+    images: ['/evento_sabado.jpg'],
+    date: '2024-11-16',
+    hasPDF: true, // Este post tiene un PDF.
   },
   {
     id: 2,
-    title: 'Titulo',
-    content: "<h2>Contenido Titulo</h2><p>Parrafo</p>",
-    images: ['/ipale.jpg', '/ipale2.jpg', '/ipale4.jpg'],
-    date: '2023-05-08',
+    title: 'Bautismos Ipa Las Encinas',
+    content: `
+    <p>
+      <strong>
+        El significado del bautismo
+      </strong>
+      El bautismo es una expresión pública de nuestra fe y una declaración de que hemos muerto al pecado y resucitado a una vida nueva con Cristo.
+      Tal como nos enseña la Palabra en Romanos 6:4:
+      <strong>
+        "Fuimos, pues, sepultados con él en la muerte por el bautismo,
+        para que como Cristo resucitó de los muertos por la gloria del Padre,
+        así también nosotros andemos en vida nueva."
+      </strong>
+    </p>`,
+    images: ['/evento1.1.webp', '/evento1.webp'],
+    date: '2024-01-26',
+    hasPDF: false, // Este post no tiene un PDF.
   },
   {
     id: 3,
-    title: 'Titulo',
-    content: "<h2>SUBTITULO</h2><p>PARRAFO</p><ol><li><strong>TITULO PARRAFO</strong></li>PARRAFO</ol></p>",
-    images: ['/ipale.jpg', '/ipale3.jpg', '/ipale5.jpg'],
-    date: '2023-05-01',
+    title: 'Jesus La Verdadera Navidad',
+    content: `<p><strong>Jesús: La Verdadera Navidad</strong>
+  En esta temporada de Navidad, la iglesia IPA Las Encinas presentó la obra <strong>"Jesús: La Verdadera Navidad"</strong>,
+                recordándonos el verdadero significado de esta celebración.
+                Más allá de los adornos, los regalos y las luces, la Navidad es un tiempo para reflexionar sobre el nacimiento de nuestro Salvador.
+                La obra nos llevó a Belén, donde un humilde pesebre se convirtió en el escenario del mayor acto de amor de la humanidad: Dios enviando a Su Hijo para salvarnos. ¡Que nunca olvidemos que Jesús es el verdadero regalo de la Navidad!
+              </p>`,
+    images: ['/evento3.webp', '/evento3.1.webp'],
+    date: '2023-12-22',
+    hasPDF: false, // Este post no tiene un PDF.
   },
+  
 ];
 
 function ImageCarousel({ images, inModal = false }: { images: string[], inModal?: boolean }) {
@@ -66,7 +88,7 @@ function ImageCarousel({ images, inModal = false }: { images: string[], inModal?
 
   return (
     <div
-      className={`relative overflow-hidden ${inModal ? 'w-full h-[50vh]' : 'w-full h-48 sm:h-64 md:h-72 lg:h-80'}`}
+      className={`relative ${inModal ? 'w-full h-[50vh]' : 'w-full h-48 sm:h-64 md:h-72 lg:h-80'} bg-gray-100`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -78,29 +100,29 @@ function ImageCarousel({ images, inModal = false }: { images: string[], inModal?
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5 }}
-          className="absolute inset-0"
+          className="absolute inset-0 flex items-center justify-center"
         >
           <Image
             src={images[currentIndex]}
             alt={`Blog image ${currentIndex + 1}`}
             layout="fill"
-            objectFit="cover"
+            objectFit="contain"
             className="bg-gray-100"
           />
         </motion.div>
       </AnimatePresence>
-      {isHovered && (
+      {isHovered && images.length > 1 && (
         <>
           <button
             onClick={prevSlide}
-            className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full"
+            className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full z-10"
             aria-label="Previous image"
           >
             <ChevronLeft size={24} />
           </button>
           <button
             onClick={nextSlide}
-            className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full"
+            className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full z-10"
             aria-label="Next image"
           >
             <ChevronRight size={24} />
@@ -159,30 +181,40 @@ export default function Blog() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-50"
             onClick={closePost}
           >
             <motion.div
               initial={{ y: 50, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 50, opacity: 0 }}
-              className="bg-white rounded-lg p-6 max-w-2xl w-full sm:max-h-[80vh] lg:max-h-[90vh] overflow-y-auto"
+              className="bg-white rounded-lg p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-500 scrollbar-track-gray-300"
               onClick={(e) => e.stopPropagation()}
             >
-              <h2 className="text-2xl font-bold mb-4 text-primary">{selectedPost.title}</h2>
-              <p className="text-sm text-text-light mb-4">
-                <time dateTime={selectedPost.date}>
-                  {new Date(selectedPost.date).toLocaleDateString()}
-                </time>
-              </p>
+              <h2 className="text-xl sm:text-2xl font-bold mb-4 text-primary">{selectedPost.title}</h2>
               <ImageCarousel images={selectedPost.images} inModal={true} />
-              <div className="mt-6 text-text" dangerouslySetInnerHTML={{ __html: selectedPost.content }} />
-              <button
-                onClick={closePost}
-                className="mt-6 bg-primary text-white px-4 py-2 rounded hover:bg-primary-dark transition-colors duration-300"
-              >
-                Cerrar
-              </button>
+              <div
+                className="mt-6 text-text overflow-y-auto max-h-[60vh]"
+                dangerouslySetInnerHTML={{ __html: selectedPost.content }}
+              />
+              <div className="flex gap-4 mt-6">
+                {selectedPost.hasPDF && (
+                  <a
+                    href="/evento_sabado.pdf"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-secondary text-white px-4 py-2 rounded hover:bg-secondary-dark transition-colors duration-300"
+                  >
+                    Descargar PDF
+                  </a>
+                )}
+                <button
+                  onClick={closePost}
+                  className="bg-primary text-white px-4 py-2 rounded hover:bg-primary-dark transition-colors duration-300"
+                >
+                  Cerrar
+                </button>
+              </div>
             </motion.div>
           </motion.div>
         )}

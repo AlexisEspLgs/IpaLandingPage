@@ -11,6 +11,10 @@ const images = [
   { id: 3, src: '/ipale3.jpg', alt: 'Ipalee 3' },
   { id: 4, src: '/ipale4.jpg', alt: 'Ipalee 4' },
   { id: 5, src: '/ipale5.jpg', alt: 'Ipalee 5' },
+  { id: 6, src: '/evento4.webp', alt: 'Ipalee 6' },
+  { id: 7, src: '/evento4.1.webp', alt: 'Ipalee 7' },
+  { id: 8, src: '/evento4.2.webp', alt: 'Ipalee 8' },
+  { id: 9, src: '/evento4.3.webp', alt: 'Ipalee 9' },
 ];
 
 export function Ipalee() {

@@ -1,42 +1,57 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from 'lucide-react';
 
 const photos = [
-  { id: 1, src: '/encuentromujeres.webp', alt: 'Encuentro de Mujeres' },
-  { id: 2, src: '/encuentromujeres.webp', alt: 'Foto 2' },
-  { id: 3, src: '/encuentromujeres.webp', alt: 'Foto 3' },
+  { id: 1, src: '/galeria.webp',  alt: 'Foto 1' },
+  { id: 2, src: '/galeria2.webp', alt: 'Foto 2' },
+  { id: 3, src: '/galeria3.webp', alt: 'Foto 3' },
+  { id: 4, src: '/galeria4.webp', alt: 'Foto 4' },
+  { id: 5, src: '/galeria5.webp', alt: 'Foto 5' },
+  { id: 6, src: '/galeria6.webp', alt: 'Foto 6' },
+  { id: 7, src: '/galeria7.webp', alt: 'Foto 7' },
+  { id: 8, src: '/encuentromujeres.webp', alt: 'Foto 8' },
 ];
 
 export function Carousel() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(0);
+  const [isZoomed, setIsZoomed] = useState(false);
 
-  useEffect(() => {
-    const timer = setInterval(() => {
+  const autoAdvance = useCallback(() => {
+    if (!isZoomed) {
       setDirection(1);
       setCurrentIndex((prevIndex) => (prevIndex + 1) % photos.length);
-    }, 5000);
+    }
+  }, [isZoomed]);
 
+  useEffect(() => {
+    const timer = setInterval(autoAdvance, 5000);
     return () => clearInterval(timer);
-  }, []);
+  }, [autoAdvance]);
 
   const paginate = (newDirection: number) => {
-    setDirection(newDirection);
-    setCurrentIndex((prevIndex) => {
-      if (newDirection === 1) {
-        return (prevIndex + 1) % photos.length;
-      }
-      return (prevIndex - 1 + photos.length) % photos.length;
-    });
+    if (!isZoomed) {
+      setDirection(newDirection);
+      setCurrentIndex((prevIndex) => {
+        if (newDirection === 1) {
+          return (prevIndex + 1) % photos.length;
+        }
+        return (prevIndex - 1 + photos.length) % photos.length;
+      });
+    }
+  };
+
+  const toggleZoom = () => {
+    setIsZoomed(!isZoomed);
   };
 
   const variants = {
     enter: (direction: number) => ({
-      x: direction > 0 ? 1000 : -1000,
+      x: direction > 0 ? '100%' : '-100%',
       opacity: 0,
     }),
     center: {
@@ -46,7 +61,7 @@ export function Carousel() {
     },
     exit: (direction: number) => ({
       zIndex: 0,
-      x: direction < 0 ? 1000 : -1000,
+      x: direction < 0 ? '100%' : '-100%',
       opacity: 0,
     }),
   };
@@ -56,13 +71,7 @@ export function Carousel() {
       <div className="container mx-auto mb-8 px-4">
         <h2 className="text-3xl font-bold text-center mb-8 text-primary">Nuestra Galería</h2>
         <div className="relative max-w-4xl mx-auto">
-          <div className="relative mb-2 h-64 sm:h-72 md:h-96 flex items-center">
-            <button
-              className="absolute left-0 mb-2 z-10 bg-white bg-opacity-50 p-2 rounded-full text-primary hover:bg-primary hover:text-white transition-all duration-200 transform -translate-x-1/2"
-              onClick={() => paginate(-1)}
-            >
-              <ChevronLeft size={24} />
-            </button>
+          <div className="relative mb-2 h-64 sm:h-72 md:h-96 flex items-center overflow-hidden rounded-lg shadow-lg">
             <AnimatePresence initial={false} custom={direction}>
               <motion.div
                 key={currentIndex}
@@ -75,36 +84,58 @@ export function Carousel() {
                   x: { type: 'spring', stiffness: 300, damping: 30 },
                   opacity: { duration: 0.2 },
                 }}
-                className="absolute w-full h-full"
+                className="absolute w-full h-full flex items-center justify-center"
               >
-                <Image
-                  src={photos[currentIndex].src}
-                  alt={photos[currentIndex].alt}
-                  fill
-                  className="object-cover rounded-lg"
-                />
+                <div className={`relative w-full h-full transition-transform duration-300 ease-in-out ${isZoomed ? 'scale-150' : 'scale-100'}`}>
+                  <Image
+                    src={photos[currentIndex].src}
+                    alt={photos[currentIndex].alt}
+                    fill
+                    quality={100}
+                    className="object-cover"
+                  />
+                </div>
               </motion.div>
             </AnimatePresence>
             <button
-              className="absolute right-0 z-10 bg-white bg-opacity-50 p-2 rounded-full text-primary hover:bg-primary hover:text-white transition-all duration-200 transform translate-x-1/2"
+              className="absolute left-4 z-10 bg-white bg-opacity-50 p-2 rounded-full text-primary hover:bg-primary hover:text-white transition-all duration-200"
+              onClick={() => paginate(-1)}
+              aria-label="Imagen anterior"
+              disabled={isZoomed}
+            >
+              <ChevronLeft size={24} />
+            </button>
+            <button
+              className="absolute right-4 z-10 bg-white bg-opacity-50 p-2 rounded-full text-primary hover:bg-primary hover:text-white transition-all duration-200"
               onClick={() => paginate(1)}
+              aria-label="Siguiente imagen"
+              disabled={isZoomed}
             >
               <ChevronRight size={24} />
             </button>
+            <button
+              className="absolute top-4 right-4 z-10 bg-white bg-opacity-50 p-2 rounded-full text-primary hover:bg-primary hover:text-white transition-all duration-200"
+              onClick={toggleZoom}
+              aria-label={isZoomed ? "Alejar imagen" : "Acercar imagen"}
+            >
+              {isZoomed ? <ZoomOut size={24} /> : <ZoomIn size={24} />}
+            </button>
           </div>
-          <div className="absolute bottom-4 mt-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+          <div className="flex justify-center mt-4 space-x-2">
             {photos.map((_, index) => (
               <button
                 key={index}
-                className={`w-3 h-3 rounded-full ${
-                  index === currentIndex ? 'bg-primary' : 'bg-gray-300'
+                className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                  index === currentIndex ? 'bg-primary scale-125' : 'bg-gray-300 hover:bg-primary-light'
                 }`}
-                onClick={() => setCurrentIndex(index)}
+                onClick={() => !isZoomed && setCurrentIndex(index)}
+                aria-label={`Ir a la imagen ${index + 1}`}
+                disabled={isZoomed}
               />
             ))}
           </div>
-          <div className="text-center mt-4 mb-4 text-text-light">
-            {currentIndex + 1} / {photos.length}
+          <div className="text-center mt-4 text-text-light">
+            <span className="font-semibold">{currentIndex + 1}</span> / {photos.length}
           </div>
         </div>
       </div>

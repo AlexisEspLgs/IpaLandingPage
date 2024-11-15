@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
+import { Download } from 'lucide-react';
 
 export function NewsPopup() {
   const [showPopup, setShowPopup] = useState(false);
@@ -16,6 +17,16 @@ export function NewsPopup() {
 
   const closePopup = () => {
     setShowPopup(false);
+  };
+
+  const handleDownload = () => {
+    // Crear un enlace temporal para descargar el PDF
+    const link = document.createElement('a');
+    link.href = '/evento_sabado.pdf'; // Asegúrate de que el PDF esté en la carpeta public
+    link.download = 'evento_sabado.pdf';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -42,10 +53,17 @@ export function NewsPopup() {
                 Ven y acompáñanos para disfrutar de un tiempo de alabanza y reflexión juntos. ¡Dios tiene algo
                 especial para ti!
               </p>
-              <div className="flex justify-center md:justify-end">
+              <div className="flex flex-col sm:flex-row justify-center md:justify-end items-center space-y-2 sm:space-y-0 sm:space-x-4">
+                <button
+                  onClick={handleDownload}
+                  className="bg-secondary text-white px-4 py-2 md:px-6 md:py-3 rounded-md hover:bg-secondary-dark transition-colors duration-300 flex items-center"
+                >
+                  <Download className="mr-2" size={20} />
+                  Descargar Información
+                </button>
                 <button
                   onClick={closePopup}
-                  className="bg-primary text-white px-4 py-2 md:px-6 md:py-3 rounded-md hover:bg-secondary transition-colors duration-300"
+                  className="bg-primary text-white px-4 py-2 md:px-6 md:py-3 rounded-md hover:bg-primary-dark transition-colors duration-300"
                 >
                   Cerrar
                 </button>
