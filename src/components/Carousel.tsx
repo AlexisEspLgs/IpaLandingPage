@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from 'lucide-react';
 
 const photos = [
-  { id: 1, src: '/galeria.webp',  alt: 'Foto 1' },
+  { id: 1, src: '/galeria.webp', alt: 'Foto 1' },
   { id: 2, src: '/galeria2.webp', alt: 'Foto 2' },
   { id: 3, src: '/galeria3.webp', alt: 'Foto 3' },
   { id: 4, src: '/galeria4.webp', alt: 'Foto 4' },
@@ -15,6 +15,8 @@ const photos = [
   { id: 7, src: '/galeria7.webp', alt: 'Foto 7' },
   { id: 8, src: '/encuentromujeres.webp', alt: 'Foto 8' },
 ];
+
+const MAX_WIDTH = '1400px'; // Máximo ancho del carrusel
 
 export function Carousel() {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -67,11 +69,16 @@ export function Carousel() {
   };
 
   return (
-    <section id="fotos" className="py-12 bg-background">
-      <div className="container mx-auto mb-8 px-4">
-        <h2 className="text-3xl font-bold text-center mb-8 text-primary">Nuestra Galería</h2>
-        <div className="relative max-w-4xl mx-auto">
-          <div className="relative mb-2 h-64 sm:h-72 md:h-96 flex items-center overflow-hidden rounded-lg shadow-lg">
+    <section id="fotos" className="py-8 sm:py-12 bg-background">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-center mb-6 sm:mb-8 text-primary">
+          Nuestra Galería
+        </h2>
+        <div className="relative mx-auto" style={{ maxWidth: MAX_WIDTH }}>
+          <div
+            className={`relative mb-2 flex items-center overflow-hidden rounded-lg shadow-lg 
+              h-[40vh] sm:h-[50vh] md:h-[60vh] lg:h-[70vh]`}
+          >
             <AnimatePresence initial={false} custom={direction}>
               <motion.div
                 key={currentIndex}
@@ -86,19 +93,26 @@ export function Carousel() {
                 }}
                 className="absolute w-full h-full flex items-center justify-center"
               >
-                <div className={`relative w-full h-full transition-transform duration-300 ease-in-out ${isZoomed ? 'scale-150' : 'scale-100'}`}>
+                <div
+                  className={`relative w-full h-full transition-transform duration-300 ease-in-out ${
+                    isZoomed ? 'scale-150' : 'scale-100'
+                  }`}
+                >
                   <Image
                     src={photos[currentIndex].src}
                     alt={photos[currentIndex].alt}
                     fill
-                    quality={100}
+                    quality={90}
                     className="object-cover"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 1400px"
+                    loading={currentIndex === 0 ? 'eager' : 'lazy'}
+                    priority={currentIndex === 0}
                   />
                 </div>
               </motion.div>
             </AnimatePresence>
             <button
-              className="absolute left-4 z-10 bg-white bg-opacity-50 p-2 rounded-full text-primary hover:bg-primary hover:text-white transition-all duration-200"
+              className="absolute left-2 sm:left-4 z-10 bg-white bg-opacity-50 p-1 sm:p-2 rounded-full text-primary hover:bg-primary hover:text-white transition-all duration-200"
               onClick={() => paginate(-1)}
               aria-label="Imagen anterior"
               disabled={isZoomed}
@@ -106,7 +120,7 @@ export function Carousel() {
               <ChevronLeft size={24} />
             </button>
             <button
-              className="absolute right-4 z-10 bg-white bg-opacity-50 p-2 rounded-full text-primary hover:bg-primary hover:text-white transition-all duration-200"
+              className="absolute right-2 sm:right-4 z-10 bg-white bg-opacity-50 p-1 sm:p-2 rounded-full text-primary hover:bg-primary hover:text-white transition-all duration-200"
               onClick={() => paginate(1)}
               aria-label="Siguiente imagen"
               disabled={isZoomed}
@@ -114,9 +128,9 @@ export function Carousel() {
               <ChevronRight size={24} />
             </button>
             <button
-              className="absolute top-4 right-4 z-10 bg-white bg-opacity-50 p-2 rounded-full text-primary hover:bg-primary hover:text-white transition-all duration-200"
+              className="absolute top-2 sm:top-4 right-2 sm:right-4 z-10 bg-white bg-opacity-50 p-1 sm:p-2 rounded-full text-primary hover:bg-primary hover:text-white transition-all duration-200"
               onClick={toggleZoom}
-              aria-label={isZoomed ? "Alejar imagen" : "Acercar imagen"}
+              aria-label={isZoomed ? 'Alejar imagen' : 'Acercar imagen'}
             >
               {isZoomed ? <ZoomOut size={24} /> : <ZoomIn size={24} />}
             </button>
@@ -125,8 +139,10 @@ export function Carousel() {
             {photos.map((_, index) => (
               <button
                 key={index}
-                className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                  index === currentIndex ? 'bg-primary scale-125' : 'bg-gray-300 hover:bg-primary-light'
+                className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-all duration-300 ${
+                  index === currentIndex
+                    ? 'bg-primary scale-125'
+                    : 'bg-gray-300 hover:bg-primary-light'
                 }`}
                 onClick={() => !isZoomed && setCurrentIndex(index)}
                 aria-label={`Ir a la imagen ${index + 1}`}
@@ -134,7 +150,7 @@ export function Carousel() {
               />
             ))}
           </div>
-          <div className="text-center mt-4 text-text-light">
+          <div className="text-center mt-4 text-text-light text-sm sm:text-base">
             <span className="font-semibold">{currentIndex + 1}</span> / {photos.length}
           </div>
         </div>
