@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Share2, Facebook, Twitter, PhoneIcon as WhatsApp } from 'lucide-react';
 
 interface BlogPostType {
   id: number;
@@ -11,7 +11,7 @@ interface BlogPostType {
   content: string;
   images: string[];
   date: string;
-  hasPDF?: boolean; // Indica si el post tiene un archivo PDF asociado.
+  hasPDF?: boolean;
 }
 
 const blogPosts: BlogPostType[] = [
@@ -26,7 +26,7 @@ const blogPosts: BlogPostType[] = [
       Además, habrá un tiempo de ungimiento y una oración final de bendición por parte del Pastor Serafín Cuevas.</p>`,
     images: ['/evento_sabado.jpg'],
     date: '2024-11-16',
-    hasPDF: true, // Este post tiene un PDF.
+    hasPDF: true,
   },
   {
     id: 2,
@@ -46,7 +46,7 @@ const blogPosts: BlogPostType[] = [
     </p>`,
     images: ['/evento1.1.webp', '/evento1.webp'],
     date: '2024-01-26',
-    hasPDF: false, // Este post no tiene un PDF.
+    hasPDF: false,
   },
   {
     id: 3,
@@ -59,9 +59,8 @@ const blogPosts: BlogPostType[] = [
               </p>`,
     images: ['/evento3.webp', '/evento3.1.webp'],
     date: '2023-12-22',
-    hasPDF: false, // Este post no tiene un PDF.
+    hasPDF: false,
   },
-  
 ];
 
 function ImageCarousel({ images, inModal = false }: { images: string[], inModal?: boolean }) {
@@ -133,15 +132,62 @@ function ImageCarousel({ images, inModal = false }: { images: string[], inModal?
   );
 }
 
+function ShareButtons({ post }: { post: BlogPostType }) {
+  const shareUrl = `https://ipalasencinas.com/blog/${post.id}`;
+  const shareText = `Mira este artículo de IPA Las Encinas: ${post.title}`;
+
+  const shareLinks = [
+    {
+      name: 'Facebook',
+      icon: <Facebook size={20} />,
+      url: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`,
+    },
+    {
+      name: 'Twitter',
+      icon: <Twitter size={20} />,
+      url: `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`,
+    },
+    {
+      name: 'WhatsApp',
+      icon: <WhatsApp size={20} />,
+      url: `https://wa.me/?text=${encodeURIComponent(`${shareText} ${shareUrl}`)}`,
+    },
+  ];
+
+  return (
+    <div className="flex space-x-2 mt-4">
+      {shareLinks.map((link) => (
+        <a
+          key={link.name}
+          href={link.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="bg-primary text-white p-2 rounded-full hover:bg-primary-dark transition-colors duration-300"
+          aria-label={`Compartir en ${link.name}`}
+        >
+          {link.icon}
+        </a>
+      ))}
+    </div>
+  );
+}
+
 export default function Blog() {
   const [selectedPost, setSelectedPost] = useState<BlogPostType | null>(null);
+  const [isShareMenuOpen, setIsShareMenuOpen] = useState(false);
 
   const openPost = (post: BlogPostType) => {
     setSelectedPost(post);
+    setIsShareMenuOpen(false);
   };
 
   const closePost = () => {
     setSelectedPost(null);
+    setIsShareMenuOpen(false);
+  };
+
+  const toggleShareMenu = () => {
+    setIsShareMenuOpen(!isShareMenuOpen);
   };
 
   return (
@@ -163,12 +209,15 @@ export default function Blog() {
                 </p>
                 <h3 className="text-xl font-semibold text-primary mb-2">{post.title}</h3>
                 <div className="text-text mb-4" dangerouslySetInnerHTML={{ __html: post.content.substring(0, 100) + '...' }} />
-                <button
-                  onClick={() => openPost(post)}
-                  className="text-primary font-semibold hover:text-secondary transition-colors duration-300"
-                >
-                  Leer más
-                </button>
+                <div className="flex justify-between items-center">
+                  <button
+                    onClick={() => openPost(post)}
+                    className="text-primary font-semibold hover:text-secondary transition-colors duration-300"
+                  >
+                    Leer más
+                  </button>
+                  <ShareButtons post={post} />
+                </div>
               </div>
             </motion.div>
           ))}
@@ -191,7 +240,21 @@ export default function Blog() {
               className="bg-white rounded-lg p-6 w-full max-w-3xl max-h-[90vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-500 scrollbar-track-gray-300"
               onClick={(e) => e.stopPropagation()}
             >
-              <h2 className="text-xl sm:text-2xl font-bold mb-4 text-primary">{selectedPost.title}</h2>
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl sm:text-2xl font-bold text-primary">{selectedPost.title}</h2>
+                <button
+                  onClick={toggleShareMenu}
+                  className="bg-primary text-white p-2 rounded-full hover:bg-primary-dark transition-colors duration-300"
+                  aria-label="Compartir artículo"
+                >
+                  <Share2 size={20} />
+                </button>
+              </div>
+              {isShareMenuOpen && (
+                <div className="mb-4">
+                  <ShareButtons post={selectedPost} />
+                </div>
+              )}
               <ImageCarousel images={selectedPost.images} inModal={true} />
               <div
                 className="mt-6 text-text overflow-y-auto max-h-[60vh]"
