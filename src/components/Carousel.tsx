@@ -5,30 +5,38 @@ import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from 'lucide-react';
 
-const photos = [
-  { id: 1, src: '/galeria.webp', alt: 'Foto 1' },
-  { id: 2, src: '/galeria2.webp', alt: 'Foto 2' },
-  { id: 3, src: '/galeria3.webp', alt: 'Foto 3' },
-  { id: 4, src: '/galeria4.webp', alt: 'Foto 4' },
-  { id: 5, src: '/galeria5.webp', alt: 'Foto 5' },
-  { id: 6, src: '/galeria6.webp', alt: 'Foto 6' },
-  { id: 7, src: '/galeria7.webp', alt: 'Foto 7' },
-  { id: 8, src: '/encuentromujeres.webp', alt: 'Foto 8' },
-];
+interface CarouselImage {
+  _id: string;
+  url: string;
+  alt: string;
+  order: number;
+}
 
 const MAX_WIDTH = '1400px'; // Máximo ancho del carrusel
 
 export function Carousel() {
+  const [photos, setPhotos] = useState<CarouselImage[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(0);
   const [isZoomed, setIsZoomed] = useState(false);
 
+  useEffect(() => {
+    const fetchImages = async () => {
+      const response = await fetch('/api/carousel');
+      if (response.ok) {
+        const data = await response.json();
+        setPhotos(data);
+      }
+    };
+    fetchImages();
+  }, []);
+
   const autoAdvance = useCallback(() => {
-    if (!isZoomed) {
+    if (!isZoomed && photos.length > 0) {
       setDirection(1);
       setCurrentIndex((prevIndex) => (prevIndex + 1) % photos.length);
     }
-  }, [isZoomed]);
+  }, [isZoomed, photos.length]);
 
   useEffect(() => {
     const timer = setInterval(autoAdvance, 5000);
@@ -36,7 +44,7 @@ export function Carousel() {
   }, [autoAdvance]);
 
   const paginate = (newDirection: number) => {
-    if (!isZoomed) {
+    if (!isZoomed && photos.length > 0) {
       setDirection(newDirection);
       setCurrentIndex((prevIndex) => {
         if (newDirection === 1) {
@@ -67,6 +75,10 @@ export function Carousel() {
       opacity: 0,
     }),
   };
+
+  if (photos.length === 0) {
+    return null;
+  }
 
   return (
     <section id="fotos" className="py-8 sm:py-12 bg-background">
@@ -99,7 +111,7 @@ export function Carousel() {
                   }`}
                 >
                   <Image
-                    src={photos[currentIndex].src}
+                    src={photos[currentIndex].url}
                     alt={photos[currentIndex].alt}
                     fill
                     quality={90}
@@ -158,3 +170,4 @@ export function Carousel() {
     </section>
   );
 }
+

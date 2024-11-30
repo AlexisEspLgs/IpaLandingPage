@@ -29,7 +29,7 @@ export function Footer() {
           <div>
             <h3 className="text-xl font-bold mb-4 text-secondary">Contacto</h3>
             <p className="text-gray-400">Teléfono: (+56) 9 77852776</p>
-            <p className="text-gray-400">Email: ipalasencinas.audiovisual@gmail.com</p>
+            <p className="text-gray-400">Email: contacto.ipale@gmail.com</p>
           </div>
         </div>
 
