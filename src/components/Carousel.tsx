@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from 'lucide-react';
+import { useAppContext } from '@/contexts/AppContext';
 
 interface CarouselImage {
   _id: string;
@@ -19,13 +20,20 @@ export function Carousel() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(0);
   const [isZoomed, setIsZoomed] = useState(false);
+  const { theme } = useAppContext();
 
   useEffect(() => {
     const fetchImages = async () => {
-      const response = await fetch('/api/carousel');
-      if (response.ok) {
-        const data = await response.json();
-        setPhotos(data);
+      try {
+        const response = await fetch('/api/carousel');
+        if (response.ok) {
+          const data = await response.json();
+          setPhotos(data);
+        } else {
+          console.error('Failed to fetch carousel images');
+        }
+      } catch (error) {
+        console.error('Error fetching carousel images:', error);
       }
     };
     fetchImages();
@@ -81,15 +89,15 @@ export function Carousel() {
   }
 
   return (
-    <section id="fotos" className="py-8 sm:py-12 bg-background">
+    <section id="fotos" className={`py-8 sm:py-12 ${theme === 'dark' ? 'bg-gray-900' : 'bg-background'}`}>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-center mb-6 sm:mb-8 text-primary">
+        <h2 className={`text-2xl sm:text-3xl lg:text-4xl font-bold text-center mb-6 sm:mb-8 ${theme === 'dark' ? 'text-gray-100' : 'text-primary'}`}>
           Nuestra Galería
         </h2>
         <div className="relative mx-auto" style={{ maxWidth: MAX_WIDTH }}>
           <div
             className={`relative mb-2 flex items-center overflow-hidden rounded-lg shadow-lg 
-              h-[40vh] sm:h-[50vh] md:h-[60vh] lg:h-[70vh]`}
+              h-[40vh] sm:h-[50vh] md:h-[60vh] lg:h-[70vh] ${theme === 'dark' ? 'shadow-gray-700' : 'shadow-gray-300'}`}
           >
             <AnimatePresence initial={false} custom={direction}>
               <motion.div
@@ -124,7 +132,11 @@ export function Carousel() {
               </motion.div>
             </AnimatePresence>
             <button
-              className="absolute left-2 sm:left-4 z-10 bg-white bg-opacity-50 p-1 sm:p-2 rounded-full text-primary hover:bg-primary hover:text-white transition-all duration-200"
+              className={`absolute left-2 sm:left-4 z-10 p-1 sm:p-2 rounded-full transition-all duration-200 ${
+                theme === 'dark'
+                  ? 'bg-gray-800 text-gray-200 hover:bg-gray-700'
+                  : 'bg-white bg-opacity-50 text-primary hover:bg-primary hover:text-white'
+              }`}
               onClick={() => paginate(-1)}
               aria-label="Imagen anterior"
               disabled={isZoomed}
@@ -132,7 +144,11 @@ export function Carousel() {
               <ChevronLeft size={24} />
             </button>
             <button
-              className="absolute right-2 sm:right-4 z-10 bg-white bg-opacity-50 p-1 sm:p-2 rounded-full text-primary hover:bg-primary hover:text-white transition-all duration-200"
+              className={`absolute right-2 sm:right-4 z-10 p-1 sm:p-2 rounded-full transition-all duration-200 ${
+                theme === 'dark'
+                  ? 'bg-gray-800 text-gray-200 hover:bg-gray-700'
+                  : 'bg-white bg-opacity-50 text-primary hover:bg-primary hover:text-white'
+              }`}
               onClick={() => paginate(1)}
               aria-label="Siguiente imagen"
               disabled={isZoomed}
@@ -140,7 +156,11 @@ export function Carousel() {
               <ChevronRight size={24} />
             </button>
             <button
-              className="absolute top-2 sm:top-4 right-2 sm:right-4 z-10 bg-white bg-opacity-50 p-1 sm:p-2 rounded-full text-primary hover:bg-primary hover:text-white transition-all duration-200"
+              className={`absolute top-2 sm:top-4 right-2 sm:right-4 z-10 p-1 sm:p-2 rounded-full transition-all duration-200 ${
+                theme === 'dark'
+                  ? 'bg-gray-800 text-gray-200 hover:bg-gray-700'
+                  : 'bg-white bg-opacity-50 text-primary hover:bg-primary hover:text-white'
+              }`}
               onClick={toggleZoom}
               aria-label={isZoomed ? 'Alejar imagen' : 'Acercar imagen'}
             >
@@ -153,7 +173,11 @@ export function Carousel() {
                 key={index}
                 className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-all duration-300 ${
                   index === currentIndex
-                    ? 'bg-primary scale-125'
+                    ? theme === 'dark'
+                      ? 'bg-blue-500 scale-125'
+                      : 'bg-primary scale-125'
+                    : theme === 'dark'
+                    ? 'bg-gray-600 hover:bg-gray-500'
                     : 'bg-gray-300 hover:bg-primary-light'
                 }`}
                 onClick={() => !isZoomed && setCurrentIndex(index)}
@@ -162,7 +186,7 @@ export function Carousel() {
               />
             ))}
           </div>
-          <div className="text-center mt-4 text-text-light text-sm sm:text-base">
+          <div className={`text-center mt-4 text-sm sm:text-base ${theme === 'dark' ? 'text-gray-300' : 'text-text-light'}`}>
             <span className="font-semibold">{currentIndex + 1}</span> / {photos.length}
           </div>
         </div>

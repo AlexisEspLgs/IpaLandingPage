@@ -3,11 +3,13 @@
 import { useState } from 'react';
 import { Send } from 'lucide-react';
 import Swal from 'sweetalert2';
+import { useAppContext } from '@/contexts/AppContext';
 
 export function ContactForm() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
+  const { theme } = useAppContext();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,8 +20,10 @@ export function ContactForm() {
       icon: 'success',
       confirmButtonText: 'Cerrar',
       customClass: {
-        confirmButton: 'bg-primary text-white rounded-lg px-6 py-2',
+        confirmButton: `${theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-primary hover:bg-secondary'} text-white rounded-lg px-6 py-2`,
       },
+      background: theme === 'dark' ? '#1F2937' : '#FFFFFF',
+      color: theme === 'dark' ? '#FFFFFF' : '#000000',
     });
 
     setName('');
@@ -28,7 +32,7 @@ export function ContactForm() {
   };
 
   return (
-    <section id="contacto" className="py-20 bg-primary">
+    <section id="contacto" className={`py-20 ${theme === 'dark' ? 'bg-gray-800' : 'bg-primary'}`}>
       <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between">
         <div className="md:w-1/2 mb-8 md:mb-0">
           <h2 className="text-3xl font-bold text-white mb-4">
@@ -41,14 +45,14 @@ export function ContactForm() {
         <div className="md:w-1/2 max-w-md w-full">
           <form
             onSubmit={handleSubmit}
-            action="https://formsubmit.co/alexislake26@gmail.com" // Reemplaza con tu email registrado en FormSubmit
+            action="https://formsubmit.co/alexislake26@gmail.com"
             method="POST"
-            className="bg-white p-8 rounded-lg shadow-lg"
+            className={`${theme === 'dark' ? 'bg-gray-700' : 'bg-white'} p-8 rounded-lg shadow-lg`}
           >
             <input type="hidden" name="_captcha" value="false" />
             
             <div className="mb-4">
-              <label htmlFor="name" className="block mb-2 text-sm font-medium text-gray-700">
+              <label htmlFor="name" className={`block mb-2 text-sm font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>
                 Nombre
               </label>
               <input
@@ -58,11 +62,15 @@ export function ContactForm() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                className="w-full px-3 py-2 text-gray-700 bg-gray-100 rounded-lg focus:outline-none focus:bg-white focus:ring-2 focus:ring-primary"
+                className={`w-full px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary ${
+                  theme === 'dark'
+                    ? 'text-white bg-gray-600 focus:bg-gray-500'
+                    : 'text-gray-700 bg-gray-100 focus:bg-white'
+                }`}
               />
             </div>
             <div className="mb-4">
-              <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-700">
+              <label htmlFor="email" className={`block mb-2 text-sm font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>
                 Correo Electrónico
               </label>
               <input
@@ -72,11 +80,15 @@ export function ContactForm() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-3 py-2 text-gray-700 bg-gray-100 rounded-lg focus:outline-none focus:bg-white focus:ring-2 focus:ring-primary"
+                className={`w-full px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary ${
+                  theme === 'dark'
+                    ? 'text-white bg-gray-600 focus:bg-gray-500'
+                    : 'text-gray-700 bg-gray-100 focus:bg-white'
+                }`}
               />
             </div>
             <div className="mb-4">
-              <label htmlFor="message" className="block mb-2 text-sm font-medium text-gray-700">
+              <label htmlFor="message" className={`block mb-2 text-sm font-medium ${theme === 'dark' ? 'text-gray-200' : 'text-gray-700'}`}>
                 Mensaje
               </label>
               <textarea
@@ -85,13 +97,21 @@ export function ContactForm() {
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 required
-                className="w-full px-3 py-2 text-gray-700 bg-gray-100 rounded-lg focus:outline-none focus:bg-white focus:ring-2 focus:ring-primary"
+                className={`w-full px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary ${
+                  theme === 'dark'
+                    ? 'text-white bg-gray-600 focus:bg-gray-500'
+                    : 'text-gray-700 bg-gray-100 focus:bg-white'
+                }`}
                 rows={4}
               ></textarea>
             </div>
             <button
               type="submit"
-              className="w-full bg-primary text-white px-4 py-2 rounded-lg font-bold hover:bg-secondary transition-colors duration-300 flex items-center justify-center"
+              className={`w-full px-4 py-2 rounded-lg font-bold transition-colors duration-300 flex items-center justify-center ${
+                theme === 'dark'
+                  ? 'bg-blue-600 text-white hover:bg-blue-700'
+                  : 'bg-primary text-white hover:bg-secondary'
+              }`}
             >
               <Send className="mr-2" size={18} />
               Enviar Mensaje
@@ -102,3 +122,4 @@ export function ContactForm() {
     </section>
   );
 }
+

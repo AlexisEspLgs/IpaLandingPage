@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { useAppContext } from '@/contexts/AppContext'
 
 interface User {
   uid: string;
@@ -27,6 +28,7 @@ export default function UsersManagement() {
   const [newUserPassword, setNewUserPassword] = useState('');
   const [newUserRole, setNewUserRole] = useState('user');
   const router = useRouter();
+  const { theme } = useAppContext();
 
   useEffect(() => {
     if (user) {
@@ -108,17 +110,17 @@ export default function UsersManagement() {
     }
   };
 
-  if (loading) return <div>Loading users...</div>;
-  if (error) return <div className="text-red-500">{error}</div>;
+  if (loading) return <div className={`text-center ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>Loading users...</div>;
+  if (error) return <div className="text-red-500 text-center">{error}</div>;
 
   return (
-    <div className="space-y-6">
+    <div className={`space-y-6 ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
       <h1 className="text-2xl font-bold">User Management</h1>
       <Dialog>
         <DialogTrigger asChild>
-          <Button>Add New User</Button>
+          <Button className={theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'}>Add New User</Button>
         </DialogTrigger>
-        <DialogContent>
+        <DialogContent className={theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white'}>
           <DialogHeader>
             <DialogTitle>Add New User</DialogTitle>
             <DialogDescription>Create a new user account.</DialogDescription>
@@ -134,7 +136,7 @@ export default function UsersManagement() {
                   type="email"
                   value={newUserEmail}
                   onChange={(e) => setNewUserEmail(e.target.value)}
-                  className="col-span-3"
+                  className={`col-span-3 ${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-white text-gray-800'}`}
                   required
                 />
               </div>
@@ -147,7 +149,7 @@ export default function UsersManagement() {
                   type="password"
                   value={newUserPassword}
                   onChange={(e) => setNewUserPassword(e.target.value)}
-                  className="col-span-3"
+                  className={`col-span-3 ${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-white text-gray-800'}`}
                   required
                 />
               </div>
@@ -156,7 +158,7 @@ export default function UsersManagement() {
                   Role
                 </label>
                 <Select value={newUserRole} onValueChange={setNewUserRole}>
-                  <SelectTrigger className="col-span-3">
+                  <SelectTrigger className={`col-span-3 ${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-white text-gray-800'}`}>
                     <SelectValue placeholder="Select a role" />
                   </SelectTrigger>
                   <SelectContent>
@@ -168,7 +170,7 @@ export default function UsersManagement() {
               </div>
             </div>
             <DialogFooter>
-              <Button type="submit">Add User</Button>
+              <Button type="submit" className={theme === 'dark' ? 'bg-green-600 hover:bg-green-700' : 'bg-green-500 hover:bg-green-600'}>Add User</Button>
             </DialogFooter>
           </form>
         </DialogContent>
@@ -176,23 +178,23 @@ export default function UsersManagement() {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Role</TableHead>
-            <TableHead>Actions</TableHead>
+            <TableHead className={theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}>Name</TableHead>
+            <TableHead className={theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}>Email</TableHead>
+            <TableHead className={theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}>Role</TableHead>
+            <TableHead className={theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {users.map((user) => (
-            <TableRow key={user.uid}>
-              <TableCell>{user.displayName}</TableCell>
-              <TableCell>{user.email}</TableCell>
+            <TableRow key={user.uid} className={theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}>
+              <TableCell className={theme === 'dark' ? 'text-white' : 'text-gray-800'}>{user.displayName}</TableCell>
+              <TableCell className={theme === 'dark' ? 'text-white' : 'text-gray-800'}>{user.email}</TableCell>
               <TableCell>
                 <Select
                   value={user.role}
                   onValueChange={(value) => handleRoleChange(user.uid, value)}
                 >
-                  <SelectTrigger className="w-[180px]">
+                  <SelectTrigger className={`w-[180px] ${theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-white text-gray-800'}`}>
                     <SelectValue placeholder="Select a role" />
                   </SelectTrigger>
                   <SelectContent>
@@ -207,17 +209,17 @@ export default function UsersManagement() {
                   <AlertDialogTrigger asChild>
                     <Button variant="destructive">Delete</Button>
                   </AlertDialogTrigger>
-                  <AlertDialogContent>
+                  <AlertDialogContent className={theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white'}>
                     <AlertDialogHeader>
                       <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                      <AlertDialogDescription>
+                      <AlertDialogDescription className={theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}>
                         This action cannot be undone. This will permanently delete the user
                         account and remove their data from our servers.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={() => handleDeleteUser(user.uid)}>
+                      <AlertDialogCancel className={theme === 'dark' ? 'bg-gray-700 text-white' : 'bg-gray-200 text-gray-800'}>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => handleDeleteUser(user.uid)} className="bg-red-600 text-white hover:bg-red-700">
                         Continue
                       </AlertDialogAction>
                     </AlertDialogFooter>

@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { loginUser } from '@/lib/firebase'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Alert } from '@/components/ui/alert'
 import { useAuth } from '@/contexts/AuthContext'
+import { Home } from 'lucide-react'
 
 export default function AdminLogin() {
   const [email, setEmail] = useState('')
@@ -42,7 +44,7 @@ export default function AdminLogin() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-500 to-purple-600">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-blue-500 to-purple-600">
       <div className="p-8 bg-white rounded-lg shadow-md w-full max-w-md">
         <h1 className="text-3xl font-bold mb-6 text-center text-gray-800">Admin Login</h1>
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -78,6 +80,12 @@ export default function AdminLogin() {
           </Button>
         </form>
       </div>
+      <Link href="/">
+        <Button variant="outline" className="mt-4 bg-white text-blue-600 hover:bg-blue-50">
+          <Home className="w-4 h-4 mr-2" />
+          Volver al inicio
+        </Button>
+      </Link>
     </div>
   )
 }

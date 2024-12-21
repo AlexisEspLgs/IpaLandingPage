@@ -5,8 +5,9 @@ import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { logoutUser } from '@/lib/firebase'
-import { Home, Users, FileText, Settings, LogOut , ImageIcon} from 'lucide-react'
+import { Home, Users, FileText, Settings, LogOut, ImageIcon } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
+import { useAppContext } from '@/contexts/AppContext'
 
 export default function AdminLayout({
   children,
@@ -14,6 +15,7 @@ export default function AdminLayout({
   children: React.ReactNode
 }) {
   const { user, loading } = useAuth()
+  const { theme } = useAppContext()
   const router = useRouter()
   const pathname = usePathname()
 
@@ -53,16 +55,22 @@ export default function AdminLayout({
   }
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      <aside className="w-64 bg-white shadow-md">
+    <div className={`flex h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gray-100'}`}>
+      <aside className={`w-64 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} shadow-md`}>
         <div className="p-4">
-          <h2 className="text-2xl font-semibold text-gray-800">Admin Panel</h2>
+          <h2 className={`text-2xl font-semibold ${theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}`}>Admin Panel</h2>
         </div>
         <nav className="mt-4">
           {menuItems.map((item) => (
             <Link key={item.href} href={item.href}>
-              <span className={`flex items-center px-4 py-2 text-gray-700 hover:bg-gray-200 ${
-                pathname === item.href ? 'bg-gray-200' : ''
+              <span className={`flex items-center px-4 py-2 ${
+                theme === 'dark' 
+                  ? 'text-gray-300 hover:bg-gray-700' 
+                  : 'text-gray-700 hover:bg-gray-200'
+              } ${
+                pathname === item.href 
+                  ? theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200' 
+                  : ''
               }`}>
                 <item.icon className="w-5 h-5 mr-2" />
                 {item.label}
@@ -71,13 +79,13 @@ export default function AdminLayout({
           ))}
         </nav>
         <div className="absolute bottom-0 w-64 p-4">
-          <Button onClick={handleLogout} className="w-full bg-red-500 hover:bg-red-600">
+          <Button onClick={handleLogout} className="w-full bg-red-500 hover:bg-red-600 text-white">
             <LogOut className="w-4 h-4 mr-2" />
             Logout
           </Button>
         </div>
       </aside>
-      <main className="flex-1 p-8 overflow-y-auto">
+      <main className={`flex-1 p-8 overflow-y-auto ${theme === 'dark' ? 'bg-gray-900 text-gray-100' : 'bg-gray-100 text-gray-900'}`}>
         {children}
       </main>
     </div>
