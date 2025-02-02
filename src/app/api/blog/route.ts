@@ -1,28 +1,31 @@
-import { NextResponse } from 'next/server'
-import dbConnect from '@/lib/mongodb'
-import BlogPost from '@/models/BlogPost'
+import { NextResponse } from "next/server"
+import dbConnect  from "@/lib/mongodb"
+import BlogPost from "@/models/BlogPost"
+import mongoose from "mongoose"
 
 export async function GET(request: Request) {
   try {
     await dbConnect()
     const { searchParams } = new URL(request.url)
-    const id = searchParams.get('id')
-    
+    const id = searchParams.get("id")
+
     if (id) {
       const post = await BlogPost.findById(id)
-      return post 
-        ? NextResponse.json({...post.toObject(), id: post._id.toString()})
-        : NextResponse.json({ error: 'Post not found' }, { status: 404 })
+      return post
+        ? NextResponse.json({ ...post.toObject(), id: post._id.toString() })
+        : NextResponse.json({ error: "Post not found" }, { status: 404 })
     }
-    
+
     const posts = await BlogPost.find({}).sort({ date: -1 })
-    return NextResponse.json(posts.map(post => ({
-      ...post.toObject(),
-      id: post._id.toString(), 
-    })))
+    return NextResponse.json(
+      posts.map((post) => ({
+        ...post.toObject(),
+        id: post._id.toString(),
+      })),
+    )
   } catch (error) {
-    console.error('Error fetching blog posts:', error)
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
+    console.error("Error fetching blog posts:", error)
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
   }
 }
 
@@ -30,11 +33,21 @@ export async function POST(request: Request) {
   await dbConnect()
   try {
     const body = await request.json()
+
+    // Validate required fields
+    if (!body.title || !body.content || !body.images || body.images.length === 0) {
+      return NextResponse.json({ error: "Title, content, and at least one image are required." }, { status: 400 })
+    }
+
     const post = await BlogPost.create(body)
     return NextResponse.json(post, { status: 201 })
   } catch (error) {
-    console.error('Error creating post:', error)
-    return NextResponse.json({ error: 'Failed to create post' }, { status: 500 })
+    console.error("Error creating post:", error)
+    if (error instanceof mongoose.Error.ValidationError) {
+      const validationErrors = Object.values(error.errors).map((err) => err.message)
+      return NextResponse.json({ error: "Validation error", details: validationErrors }, { status: 400 })
+    }
+    return NextResponse.json({ error: "Failed to create post" }, { status: 500 })
   }
 }
 
@@ -44,28 +57,28 @@ export async function PUT(request: Request) {
     const body = await request.json()
     const post = await BlogPost.findByIdAndUpdate(body.id, body, { new: true, runValidators: true })
     if (!post) {
-      return NextResponse.json({ error: 'Post not found' }, { status: 404 })
+      return NextResponse.json({ error: "Post not found" }, { status: 404 })
     }
     return NextResponse.json(post)
   } catch (error) {
-    console.error('Error updating post:', error)
-    return NextResponse.json({ error: 'Failed to update post' }, { status: 500 })
+    console.error("Error updating post:", error)
+    return NextResponse.json({ error: "Failed to update post" }, { status: 500 })
   }
 }
 
 export async function DELETE(request: Request) {
   await dbConnect()
   const { searchParams } = new URL(request.url)
-  const id = searchParams.get('id')
+  const id = searchParams.get("id")
   try {
     const deletedPost = await BlogPost.findByIdAndDelete(id)
     if (!deletedPost) {
-      return NextResponse.json({ error: 'Post not found' }, { status: 404 })
+      return NextResponse.json({ error: "Post not found" }, { status: 404 })
     }
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error deleting post:', error)
-    return NextResponse.json({ error: 'Failed to delete post' }, { status: 500 })
+    console.error("Error deleting post:", error)
+    return NextResponse.json({ error: "Failed to delete post" }, { status: 500 })
   }
 }
 

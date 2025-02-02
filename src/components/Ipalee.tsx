@@ -1,44 +1,52 @@
-'use client';
+"use client"
 
-import { useState } from 'react';
-import Image from 'next/image';
-import { X } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useAppContext } from '@/contexts/AppContext';
+import { useState, useEffect } from "react"
+import Image from "next/image"
+import { X } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
+import { useAppContext } from "@/contexts/AppContext"
 
-const images = [
-  { id: 1, src: '/ipale.jpg', alt: 'Ipalee 1' },
-  { id: 2, src: '/ipale2.jpg', alt: 'Ipalee 2' },
-  { id: 3, src: '/ipale3.jpg', alt: 'Ipalee 3' },
-  { id: 4, src: '/ipale4.jpg', alt: 'Ipalee 4' },
-  { id: 5, src: '/ipale5.jpg', alt: 'Ipalee 5' },
-  { id: 6, src: '/evento4.webp', alt: 'Ipalee 6' },
-  { id: 7, src: '/evento4.1.webp', alt: 'Ipalee 7' },
-  { id: 8, src: '/evento4.2.webp', alt: 'Ipalee 8' },
-  { id: 9, src: '/evento4.3.webp', alt: 'Ipalee 9' },
-];
+interface IpaleeImage {
+  id: string
+  url: string
+  order: number
+}
 
-export function Ipalee() {
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const { theme } = useAppContext();
+export default function Ipalee() {
+  const [selectedImage, setSelectedImage] = useState<string | null>(null)
+  const { theme } = useAppContext()
+  const [images, setImages] = useState<IpaleeImage[]>([])
+
+  useEffect(() => {
+    const fetchImages = async () => {
+      try {
+        const response = await fetch("/api/admin/ipalee-config")
+        if (response.ok) {
+          const data = await response.json()
+          setImages(data.images)
+        }
+      } catch (error) {
+        console.error("Error fetching ipalee images:", error)
+      }
+    }
+    fetchImages()
+  }, [])
 
   return (
-    <section id="ipalee" className={`py-20 ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'}`}>
+    <section id="ipalee" className={`py-20 ${theme === "dark" ? "bg-gray-900" : "bg-white"}`}>
       <div className="container mx-auto">
-        <div className={`${
-          theme === 'dark' 
-            ? 'bg-gradient-to-r from-blue-900 to-purple-900' 
-            : 'bg-gradient-to-r from-primary to-secondary'
-        } text-white p-6 rounded-lg mb-12 text-center shadow-lg transform transition-all duration-300 hover:scale-105 flex items-center justify-between`}>
+        <div
+          className={`${
+            theme === "dark"
+              ? "bg-gradient-to-r from-blue-900 to-purple-900"
+              : "bg-gradient-to-r from-primary to-secondary"
+          } text-white p-6 rounded-lg mb-12 text-center shadow-lg transform transition-all duration-300 hover:scale-105 flex items-center justify-between`}
+        >
           <h2 className="text-3xl font-bold">
-            <span>Jovenes  </span>
-            <span className={`${theme === 'dark' ? 'text-blue-300' : 'text-white'}`}>
+            <span>Jovenes </span>
+            <span className={`${theme === "dark" ? "text-blue-300" : "text-white"}`}>
               {Array.from("Ipalee").map((letter, index) => (
-                <span
-                  key={index}
-                  className="inline-block animate-bounce"
-                  style={{ animationDelay: `${index * 0.1}s` }}
-                >
+                <span key={index} className="inline-block animate-bounce" style={{ animationDelay: `${index * 0.1}s` }}>
                   {letter}
                 </span>
               ))}
@@ -50,18 +58,19 @@ export function Ipalee() {
             <motion.div
               key={image.id}
               className={`aspect-square overflow-hidden rounded-lg shadow-lg cursor-pointer ${
-                theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'
+                theme === "dark" ? "bg-gray-800" : "bg-gray-100"
               }`}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
               <Image
-                src={image.src}
-                alt={image.alt}
+                src={image.url || "/placeholder.svg"}
+                alt={`Ipalee ${image.order + 1}`}
                 width={300}
                 height={300}
                 className="w-full h-full object-cover"
-                onClick={() => setSelectedImage(image.src)}
+                onClick={() => setSelectedImage(image.url)}
+                loading="lazy"
               />
             </motion.div>
           ))}
@@ -69,11 +78,11 @@ export function Ipalee() {
 
         <AnimatePresence>
           {selectedImage && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50" 
+              className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
               onClick={() => setSelectedImage(null)}
             >
               <motion.div
@@ -83,7 +92,7 @@ export function Ipalee() {
                 className="relative max-w-4xl w-full"
               >
                 <Image
-                  src={selectedImage}
+                  src={selectedImage || "/placeholder.svg"}
                   alt="Enlarged Ipalee image"
                   width={1200}
                   height={1200}
@@ -91,11 +100,11 @@ export function Ipalee() {
                 />
                 <button
                   className={`absolute top-2 right-2 text-white ${
-                    theme === 'dark' ? 'bg-gray-800' : 'bg-black'
+                    theme === "dark" ? "bg-gray-800" : "bg-black"
                   } bg-opacity-50 p-2 rounded-full hover:bg-opacity-75 transition-colors duration-300`}
                   onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedImage(null);
+                    e.stopPropagation()
+                    setSelectedImage(null)
                   }}
                 >
                   <X size={24} />
@@ -106,6 +115,6 @@ export function Ipalee() {
         </AnimatePresence>
       </div>
     </section>
-  );
+  )
 }
 

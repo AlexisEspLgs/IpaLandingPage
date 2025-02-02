@@ -7,27 +7,20 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Slider } from "@/components/ui/slider"
 import { useAppContext } from "@/contexts/AppContext"
 import { uploadImage } from "@/lib/uploadImage"
 
-interface InicioConfig {
+interface HistoriaConfig {
   title: string
-  subtitle: string
+  description: string
   imageUrl: string
-  imagePosition: "left" | "right"
-  imageWidth: number
-  imageHeight: number
 }
 
-export default function AdminInicioPage() {
-  const [config, setConfig] = useState<InicioConfig>({
+export default function AdminHistoriaPage() {
+  const [config, setConfig] = useState<HistoriaConfig>({
     title: "",
-    subtitle: "",
+    description: "",
     imageUrl: "",
-    imagePosition: "left",
-    imageWidth: 200,
-    imageHeight: 200,
   })
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
@@ -36,7 +29,7 @@ export default function AdminInicioPage() {
 
   useEffect(() => {
     const fetchConfig = async () => {
-      const response = await fetch("/api/admin/inicio-config")
+      const response = await fetch("/api/admin/historia-config")
       if (response.ok) {
         const data = await response.json()
         setConfig(data)
@@ -67,7 +60,7 @@ export default function AdminInicioPage() {
   const handleSave = async () => {
     setIsSaving(true)
     try {
-      const response = await fetch("/api/admin/inicio-config", {
+      const response = await fetch("/api/admin/historia-config", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(config),
@@ -92,7 +85,7 @@ export default function AdminInicioPage() {
 
   return (
     <div className={`space-y-6 ${theme === "dark" ? "text-white" : "text-gray-800"}`}>
-      <h1 className="text-3xl font-bold">Editar Sección de Inicio</h1>
+      <h1 className="text-3xl font-bold">Editar Sección de Historia</h1>
       <Card>
         <CardHeader>
           <CardTitle>Configuración General</CardTitle>
@@ -111,14 +104,15 @@ export default function AdminInicioPage() {
             />
           </div>
           <div>
-            <label htmlFor="subtitle" className="block text-sm font-medium mb-1">
-              Subtítulo
+            <label htmlFor="description" className="block text-sm font-medium mb-1">
+              Descripción
             </label>
             <Textarea
-              id="subtitle"
-              name="subtitle"
-              value={config.subtitle}
+              id="description"
+              name="description"
+              value={config.description}
               onChange={handleInputChange}
+              rows={6}
               className={theme === "dark" ? "bg-gray-700 text-white" : ""}
             />
           </div>
@@ -139,51 +133,12 @@ export default function AdminInicioPage() {
               <Image
                 src={config.imageUrl || "/placeholder.svg"}
                 alt="Preview"
-                width={200}
+                width={300}
                 height={200}
                 className="rounded-md"
               />
             </div>
           )}
-          <div>
-            <label className="block text-sm font-medium mb-1">Posición de la Imagen</label>
-            <div className="flex space-x-4">
-              <Button
-                onClick={() => setConfig((prev) => ({ ...prev, imagePosition: "left" }))}
-                variant={config.imagePosition === "left" ? "default" : "outline"}
-              >
-                Izquierda
-              </Button>
-              <Button
-                onClick={() => setConfig((prev) => ({ ...prev, imagePosition: "right" }))}
-                variant={config.imagePosition === "right" ? "default" : "outline"}
-              >
-                Derecha
-              </Button>
-            </div>
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Ancho de la Imagen</label>
-            <Slider
-              min={100}
-              max={500}
-              step={10}
-              value={[config.imageWidth]}
-              onValueChange={(value: number[]) => setConfig((prev) => ({ ...prev, imageWidth: value[0] }))}
-            />
-            <span className="text-sm">{config.imageWidth}px</span>
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Alto de la Imagen</label>
-            <Slider
-              min={100}
-              max={500}
-              step={10}
-              value={[config.imageHeight]}
-              onValueChange={(value: number[]) => setConfig((prev) => ({ ...prev, imageHeight: value[0] }))}
-            />
-            <span className="text-sm">{config.imageHeight}px</span>
-          </div>
         </CardContent>
       </Card>
       <Button onClick={handleSave} disabled={isSaving}>

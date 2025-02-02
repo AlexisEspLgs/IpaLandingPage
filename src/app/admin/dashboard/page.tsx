@@ -1,47 +1,63 @@
-'use client'
+"use client"
 
-import { useEffect, useState } from 'react'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { Users, FileText, Calendar } from 'lucide-react'
+import { useEffect, useState } from "react"
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
+import { Users, FileText, Image } from "lucide-react"
+import { useAppContext } from "@/contexts/AppContext"
 
-interface RecentActivity {
-  id: number;
-  action: string;
-  date: string;
+interface DashboardStats {
+  totalUsers: number
+  totalPosts: number
+  totalCarouselImages: number
+  recentUsers: { id: string; email: string; lastLogin: string }[]
 }
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState<{
-    totalUsers: number;
-    totalPosts: number;
-    recentActivity: RecentActivity[];
-  }>({
+  const { theme } = useAppContext()
+  const [stats, setStats] = useState<DashboardStats>({
     totalUsers: 0,
     totalPosts: 0,
-    recentActivity: []
+    totalCarouselImages: 0,
+    recentUsers: [],
   })
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    // Aquí normalmente harías una llamada a la API para obtener las estadísticas reales
-    // Por ahora, usaremos datos de ejemplo
-    setStats({
-      totalUsers: 1234,
-      totalPosts: 56,
-      recentActivity: [
-        { id: 1, action: 'New user registered', date: '2023-06-01' },
-        { id: 2, action: 'New blog post published', date: '2023-05-30' },
-        { id: 3, action: 'User settings updated', date: '2023-05-29' },
-      ]
-    })
+    const fetchDashboardStats = async () => {
+      try {
+        const response = await fetch("/api/admin/dashboard-stats")
+        if (!response.ok) {
+          throw new Error("Failed to fetch dashboard stats")
+        }
+        const data = await response.json()
+        setStats(data)
+      } catch (err) {
+        setError("Error al cargar las estadísticas del dashboard")
+        console.error("Error fetching dashboard stats:", err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchDashboardStats()
   }, [])
 
+  if (loading) {
+    return <div className="text-center p-4">Cargando estadísticas...</div>
+  }
+
+  if (error) {
+    return <div className="text-center text-red-500 p-4">{error}</div>
+  }
+
   return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold text-gray-800">Dashboard</h1>
+    <div className={`space-y-6 ${theme === "dark" ? "text-white" : "text-gray-800"}`}>
+      <h1 className="text-3xl font-bold">Dashboard</h1>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Usuarios</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -59,20 +75,28 @@ export default function AdminDashboard() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Recent Activity</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Imágenes en Carrusel</CardTitle>
+            <Image className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <ul className="space-y-2">
-              {stats.recentActivity.map((activity: RecentActivity) => (
-                <li key={activity.id} className="text-sm">
-                  {activity.action} - {activity.date}
-                </li>
-              ))}
-            </ul>
+            <div className="text-2xl font-bold">{stats.totalCarouselImages}</div>
           </CardContent>
         </Card>
       </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Usuarios Recientes</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ul className="space-y-2">
+            {stats.recentUsers.map((user) => (
+              <li key={user.id} className="text-sm">
+                {user.email} - Último acceso: {new Date(user.lastLogin).toLocaleString()}
+              </li>
+            ))}
+          </ul>
+        </CardContent>
+      </Card>
     </div>
   )
 }

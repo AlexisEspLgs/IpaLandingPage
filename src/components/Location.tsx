@@ -16,9 +16,7 @@ export default function LocationMap() {
     if (mapContainer.current) {
       const map = new maplibregl.Map({
         container: mapContainer.current,
-        style: theme === 'dark'
-          ? 'https://api.maptiler.com/maps/streets-dark/style.json?key=YpGhJSKoKSu5oayHIspN'
-          : 'https://api.maptiler.com/maps/streets/style.json?key=YpGhJSKoKSu5oayHIspN',
+        style:  'https://api.maptiler.com/maps/streets/style.json?key=YpGhJSKoKSu5oayHIspN',
         center: [-72.482402, -37.457536],
         zoom: 10,
         touchZoomRotate: false,

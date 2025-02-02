@@ -115,7 +115,7 @@ export default function UsersManagement() {
 
   return (
     <div className={`space-y-6 ${theme === 'dark' ? 'text-white' : 'text-gray-800'}`}>
-      <h1 className="text-2xl font-bold">User Management</h1>
+      <h1 className="text-2xl font-bold">Gestion de Usuarios.</h1>
       <Dialog>
         <DialogTrigger asChild>
           <Button className={theme === 'dark' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'}>Add New User</Button>

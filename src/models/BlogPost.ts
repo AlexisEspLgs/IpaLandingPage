@@ -3,19 +3,20 @@ import mongoose from "mongoose"
 const BlogPostSchema = new mongoose.Schema({
   title: {
     type: String,
-    required: [true, 'Please provide a title for this post.'],
-    maxlength: [60, 'Title cannot be more than 60 characters'],
+    required: [true, "Please provide a title for this post."],
+    maxlength: [60, "Title cannot be more than 60 characters"],
   },
   content: {
     type: String,
-    required: [true, 'Please provide the content for this post.'],
+    required: [true, "Please provide the content for this post."],
   },
   images: {
     type: [String],
-    required: [true, 'Please provide at least one image URL.'],
+    required: [true, "Please provide at least one image URL."],
   },
   date: {
     type: Date,
+    required: [true, "Please provide a date for this post."],
     default: Date.now,
   },
   hasPDF: {
@@ -25,5 +26,5 @@ const BlogPostSchema = new mongoose.Schema({
   pdfUrl: String,
 })
 
-export default mongoose.models.BlogPost || mongoose.model('BlogPost', BlogPostSchema)
+export default mongoose.models.BlogPost || mongoose.model("BlogPost", BlogPostSchema)
 

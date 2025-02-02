@@ -1,15 +1,15 @@
-'use client'
+"use client"
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import Image from 'next/image'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Alert } from '@/components/ui/alert'
-import { BlogPost } from '@/types/blog'
-import { uploadImage } from '@/lib/uploadImage'
-import { X, ArrowUp, ArrowDown } from 'lucide-react'
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
+import Image from "next/image"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Alert } from "@/components/ui/alert"
+import type { BlogPost } from "@/types/blog"
+import { uploadImage } from "@/lib/uploadImage"
+import { X, ArrowUp, ArrowDown } from "lucide-react"
 
 interface BlogPostFormProps {
   postId?: string
@@ -17,13 +17,13 @@ interface BlogPostFormProps {
 
 export function BlogPostForm({ postId }: BlogPostFormProps) {
   const [, setPost] = useState<BlogPost | null>(null)
-  const [title, setTitle] = useState('')
-  const [content, setContent] = useState('')
+  const [title, setTitle] = useState("")
+  const [content, setContent] = useState("")
   const [images, setImages] = useState<string[]>([])
   const [hasPDF, setHasPDF] = useState(false)
-  const [pdfUrl, setPdfUrl] = useState('')
+  const [pdfUrl, setPdfUrl] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [error, setError] = useState('')
+  const [error, setError] = useState("")
   const [isUploading, setIsUploading] = useState(false)
   const router = useRouter()
 
@@ -37,7 +37,7 @@ export function BlogPostForm({ postId }: BlogPostFormProps) {
     try {
       const response = await fetch(`/api/blog?id=${id}`)
       if (!response.ok) {
-        throw new Error('Failed to fetch post')
+        throw new Error("Failed to fetch post")
       }
       const data = await response.json()
       setPost(data)
@@ -45,10 +45,10 @@ export function BlogPostForm({ postId }: BlogPostFormProps) {
       setContent(data.content)
       setImages(data.images)
       setHasPDF(data.hasPDF)
-      setPdfUrl(data.pdfUrl || '')
+      setPdfUrl(data.pdfUrl || "")
     } catch (err) {
-      console.error('Error fetching post:', err)
-      setError('Failed to load post. Please try again.')
+      console.error("Error fetching post:", err)
+      setError("Failed to load post. Please try again.")
     }
   }
 
@@ -61,8 +61,8 @@ export function BlogPostForm({ postId }: BlogPostFormProps) {
       const imageUrl = await uploadImage(file)
       setImages([...images, imageUrl])
     } catch (error) {
-      console.error('Error uploading image:', error)
-      setError('Error al subir la imagen. Por favor, inténtalo de nuevo.')
+      console.error("Error uploading image:", error)
+      setError("Error al subir la imagen. Por favor, inténtalo de nuevo.")
     } finally {
       setIsUploading(false)
     }
@@ -72,12 +72,12 @@ export function BlogPostForm({ postId }: BlogPostFormProps) {
     setImages(images.filter((_, i) => i !== index))
   }
 
-  const handleMoveImage = (index: number, direction: 'up' | 'down') => {
-    if ((direction === 'up' && index > 0) || (direction === 'down' && index < images.length - 1)) {
+  const handleMoveImage = (index: number, direction: "up" | "down") => {
+    if ((direction === "up" && index > 0) || (direction === "down" && index < images.length - 1)) {
       const newImages = [...images]
       const temp = newImages[index]
-      newImages[index] = newImages[index + (direction === 'up' ? -1 : 1)]
-      newImages[index + (direction === 'up' ? -1 : 1)] = temp
+      newImages[index] = newImages[index + (direction === "up" ? -1 : 1)]
+      newImages[index + (direction === "up" ? -1 : 1)] = temp
       setImages(newImages)
     }
   }
@@ -85,10 +85,11 @@ export function BlogPostForm({ postId }: BlogPostFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
-    setError('')
+    setError("")
+    console.log("images:", images)
 
     if (images.length === 0) {
-      setError('Al menos una imagen es requerida')
+      setError("Al menos una imagen es requerida")
       setIsSubmitting(false)
       return
     }
@@ -103,22 +104,22 @@ export function BlogPostForm({ postId }: BlogPostFormProps) {
     }
 
     try {
-      const response = await fetch('/api/blog', {
-        method: postId ? 'PUT' : 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/blog", {
+        method: postId ? "PUT" : "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       })
 
       if (response.ok) {
-        router.push('/admin/blog')
+        router.push("/admin/blog")
         router.refresh()
       } else {
         const data = await response.json()
-        setError(data.error || 'Error al guardar el post')
+        setError(data.error || "Error al guardar el post")
       }
     } catch (error) {
-      console.error('Error saving post:', error)
-      setError('Ocurrió un error inesperado')
+      console.error("Error saving post:", error)
+      setError("Ocurrió un error inesperado")
     } finally {
       setIsSubmitting(false)
     }
@@ -130,25 +131,13 @@ export function BlogPostForm({ postId }: BlogPostFormProps) {
         <label htmlFor="title" className="block text-sm font-medium text-gray-700">
           Título
         </label>
-        <Input
-          type="text"
-          id="title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          required
-        />
+        <Input type="text" id="title" value={title} onChange={(e) => setTitle(e.target.value)} required />
       </div>
       <div>
         <label htmlFor="content" className="block text-sm font-medium text-gray-700">
           Contenido
         </label>
-        <Textarea
-          id="content"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          required
-          rows={10}
-        />
+        <Textarea id="content" value={content} onChange={(e) => setContent(e.target.value)} required rows={10} />
       </div>
       <div>
         <label htmlFor="image" className="block text-sm font-medium text-gray-700">
@@ -164,7 +153,7 @@ export function BlogPostForm({ postId }: BlogPostFormProps) {
             className="mr-2"
           />
           <Button type="button" disabled={isUploading}>
-            {isUploading ? 'Subiendo...' : 'Subir Imagen'}
+            {isUploading ? "Subiendo..." : "Subir Imagen"}
           </Button>
         </div>
         {images.length > 0 && (
@@ -172,7 +161,7 @@ export function BlogPostForm({ postId }: BlogPostFormProps) {
             {images.map((url, index) => (
               <div key={index} className="relative group">
                 <Image
-                  src={url}
+                  src={url || "/placeholder.svg"}
                   alt={`Imagen ${index + 1}`}
                   width={200}
                   height={200}
@@ -194,7 +183,7 @@ export function BlogPostForm({ postId }: BlogPostFormProps) {
                     variant="secondary"
                     size="sm"
                     className="mr-2"
-                    onClick={() => handleMoveImage(index, 'up')}
+                    onClick={() => handleMoveImage(index, "up")}
                     disabled={index === 0}
                   >
                     <ArrowUp className="h-4 w-4" />
@@ -204,7 +193,7 @@ export function BlogPostForm({ postId }: BlogPostFormProps) {
                     type="button"
                     variant="secondary"
                     size="sm"
-                    onClick={() => handleMoveImage(index, 'down')}
+                    onClick={() => handleMoveImage(index, "down")}
                     disabled={index === images.length - 1}
                   >
                     <ArrowDown className="h-4 w-4" />
@@ -218,12 +207,7 @@ export function BlogPostForm({ postId }: BlogPostFormProps) {
       </div>
       <div>
         <label className="flex items-center">
-          <input
-            type="checkbox"
-            checked={hasPDF}
-            onChange={(e) => setHasPDF(e.target.checked)}
-            className="mr-2"
-          />
+          <input type="checkbox" checked={hasPDF} onChange={(e) => setHasPDF(e.target.checked)} className="mr-2" />
           <span className="text-sm font-medium text-gray-700">Tiene PDF</span>
         </label>
       </div>
@@ -232,18 +216,12 @@ export function BlogPostForm({ postId }: BlogPostFormProps) {
           <label htmlFor="pdfUrl" className="block text-sm font-medium text-gray-700">
             URL del PDF
           </label>
-          <Input
-            type="text"
-            id="pdfUrl"
-            value={pdfUrl}
-            onChange={(e) => setPdfUrl(e.target.value)}
-            required={hasPDF}
-          />
+          <Input type="text" id="pdfUrl" value={pdfUrl} onChange={(e) => setPdfUrl(e.target.value)} required={hasPDF} />
         </div>
       )}
       {error && <Alert variant="destructive">{error}</Alert>}
       <Button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? 'Guardando...' : postId ? 'Actualizar Post' : 'Crear Post'}
+        {isSubmitting ? "Guardando..." : postId ? "Actualizar Post" : "Crear Post"}
       </Button>
     </form>
   )
