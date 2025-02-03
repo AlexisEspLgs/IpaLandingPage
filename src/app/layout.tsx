@@ -4,6 +4,7 @@ import { Inter } from 'next/font/google'
 import { AppProvider } from '@/contexts/AppContext'
 import { AuthProvider } from '@/contexts/AuthContext'
 
+
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {

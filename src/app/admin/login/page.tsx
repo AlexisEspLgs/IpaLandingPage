@@ -104,8 +104,8 @@ export default function LoginPage() {
 
           <div className="flex items-center justify-between">
             <div className="text-sm">
-              <Link href="/admin/forgot-password" className="font-medium text-indigo-600 hover:text-indigo-500">
-                Olvidaste Tu Contraseña?
+              <Link href="/admin/recuperar-contrasena" className="font-medium text-indigo-600 hover:text-indigo-500">
+                ¿Olvidaste tu contraseña?
               </Link>
             </div>
           </div>

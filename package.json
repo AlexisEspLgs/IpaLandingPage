@@ -6,8 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "create-admin": "ts-node --project tsconfig.scripts.json scripts/create-admin-user.ts"
+    "lint": "next lint"
   },
   "dependencies": {
     "@netlify/plugin-nextjs": "^5.8.1",
@@ -42,9 +41,11 @@
     "react-beautiful-dnd": "^13.1.1",
     "react-dom": "^18.2.0",
     "react-firebase-hooks": "^5.1.1",
+    "react-hot-toast": "^2.5.1",
     "react-icons": "^5.3.0",
     "react-intersection-observer": "^9.15.1",
     "react-leaflet": "^4.2.1",
+    "react-loading-skeleton": "^3.5.0",
     "react-slick": "^0.30.2",
     "react-virtualized-auto-sizer": "^1.0.25",
     "react-window": "^1.8.11",
@@ -52,7 +53,7 @@
     "slick-carousel": "^1.8.1",
     "sweetalert2": "^11.14.5",
     "swiper": "^11.1.14",
-    "tailwind-merge": "^2.5.5",
+    "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {

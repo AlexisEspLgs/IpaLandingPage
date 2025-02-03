@@ -18,6 +18,9 @@ export async function GET() {
     // Obtener el total de imágenes en el carrusel
     const totalCarouselImages = await db.collection("carouselimages").countDocuments()
 
+    // Obtener el total de Suscripciones 
+    const totalSubscriptions = await db.collection("subscriptions").countDocuments()
+
     // Obtener los usuarios más recientes
     const recentUsers = (await auth.listUsers(5)).users.map((user) => ({
       id: user.uid,
@@ -25,15 +28,31 @@ export async function GET() {
       lastLogin: user.metadata.lastSignInTime,
     }))
 
+    // Obtener los usuarios más recientes que se han suscrito
+    const recentUsersSubs = await db
+      .collection("subscriptions")
+      .find()
+      .sort({ createdAt: -1 }) // Ordena por el campo lastLogin de manera descendente
+      .limit(3) // Limita la consulta a un solo documento (el más reciente)
+      .toArray()
+
+    // Si no hay suscripciones recientes, devuelve un array vacío
+    const formattedRecentUsersSubs = recentUsersSubs.map(user => ({
+      id: user._id.toString(), // El ID puede estar en formato ObjectId, por eso lo convertimos a string
+      email: user.email,
+      lastLogin: user.lastLogin,
+    }))
+
     return NextResponse.json({
       totalUsers,
       totalPosts,
       totalCarouselImages,
       recentUsers,
+      totalSubscriptions,
+      recentUsersSubs: formattedRecentUsersSubs, // Mapea los datos a un formato usable
     })
   } catch (error) {
     console.error("Error fetching dashboard stats:", error)
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
   }
 }
-

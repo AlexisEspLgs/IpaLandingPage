@@ -84,141 +84,111 @@ export default function AdminFooterPage() {
   }
 
   return (
-    <div className={`space-y-6 ${theme === "dark" ? "text-white" : "text-gray-800"}`}>
-      <h1 className="text-3xl font-bold">Configuración del Footer</h1>
-      <Card>
-        <CardHeader>
-          <CardTitle>Información General</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor="churchName">Nombre de la Iglesia</Label>
-            <Input
-              id="churchName"
-              name="churchName"
-              value={config.churchName}
-              onChange={handleInputChange}
-              className={theme === "dark" ? "bg-gray-700 text-white" : ""}
-            />
-          </div>
-          <div>
-            <Label htmlFor="address">Dirección</Label>
-            <Input
-              id="address"
-              name="address"
-              value={config.address}
-              onChange={handleInputChange}
-              className={theme === "dark" ? "bg-gray-700 text-white" : ""}
-            />
-          </div>
-          <div>
-            <Label htmlFor="phone">Teléfono</Label>
-            <Input
-              id="phone"
-              name="phone"
-              value={config.phone}
-              onChange={handleInputChange}
-              className={theme === "dark" ? "bg-gray-700 text-white" : ""}
-            />
-          </div>
-          <div>
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              name="email"
-              value={config.email}
-              onChange={handleInputChange}
-              className={theme === "dark" ? "bg-gray-700 text-white" : ""}
-            />
-          </div>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader>
-          <CardTitle>Redes Sociales</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor="facebookUrl">URL de Facebook</Label>
-            <Input
-              id="facebookUrl"
-              name="facebookUrl"
-              value={config.facebookUrl}
-              onChange={handleInputChange}
-              className={theme === "dark" ? "bg-gray-700 text-white" : ""}
-            />
-          </div>
-          <div>
-            <Label htmlFor="instagramUrl">URL de Instagram</Label>
-            <Input
-              id="instagramUrl"
-              name="instagramUrl"
-              value={config.instagramUrl}
-              onChange={handleInputChange}
-              className={theme === "dark" ? "bg-gray-700 text-white" : ""}
-            />
-          </div>
-          <div>
-            <Label htmlFor="tiktokUrl">URL de TikTok</Label>
-            <Input
-              id="tiktokUrl"
-              name="tiktokUrl"
-              value={config.tiktokUrl}
-              onChange={handleInputChange}
-              className={theme === "dark" ? "bg-gray-700 text-white" : ""}
-            />
-          </div>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader>
-          <CardTitle>Newsletter</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor="newsletterTitle">Título del Newsletter</Label>
-            <Input
-              id="newsletterTitle"
-              name="newsletterTitle"
-              value={config.newsletterTitle}
-              onChange={handleInputChange}
-              className={theme === "dark" ? "bg-gray-700 text-white" : ""}
-            />
-          </div>
-          <div>
-            <Label htmlFor="newsletterDescription">Descripción del Newsletter</Label>
-            <Textarea
-              id="newsletterDescription"
-              name="newsletterDescription"
-              value={config.newsletterDescription}
-              onChange={handleInputChange}
-              rows={3}
-              className={theme === "dark" ? "bg-gray-700 text-white" : ""}
-            />
-          </div>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader>
-          <CardTitle>Copyright</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div>
-            <Label htmlFor="copyrightText">Texto de Copyright</Label>
-            <Input
-              id="copyrightText"
-              name="copyrightText"
-              value={config.copyrightText}
-              onChange={handleInputChange}
-              className={theme === "dark" ? "bg-gray-700 text-white" : ""}
-            />
-          </div>
-        </CardContent>
-      </Card>
-      <Button onClick={handleSave} disabled={isSaving}>
-        {isSaving ? "Guardando..." : "Guardar Cambios"}
-      </Button>
+    <div className={`space-y-8 p-6 ${theme === "dark" ? "text-white bg-gray-800" : "text-gray-800"}`}>
+      <h1 className="text-4xl font-semibold">Configuración del Footer</h1>
+      <div className="space-y-6">
+        {/* Información General */}
+        <Card className="shadow-lg rounded-xl">
+          <CardHeader>
+            <CardTitle className="text-xl font-medium">Información General</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {["churchName", "address", "phone", "email"].map((field) => (
+              <div key={field}>
+                <Label htmlFor={field} className="block text-sm font-semibold">{field === 'churchName' ? "Nombre de la Iglesia" : field === 'address' ? "Dirección" : field === 'phone' ? "Teléfono" : "Email"}</Label>
+                <Input
+                  id={field}
+                  name={field}
+                  value={config[field as keyof FooterConfig]}
+                  onChange={handleInputChange}
+                  className={`mt-2 p-3 rounded-md border ${theme === "dark" ? "bg-gray-700 text-white" : "bg-white text-gray-800"} shadow-sm focus:ring-2 focus:ring-indigo-400 transition-all ease-in-out`}
+                />
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
+        {/* Redes Sociales */}
+        <Card className="shadow-lg rounded-xl">
+          <CardHeader>
+            <CardTitle className="text-xl font-medium">Redes Sociales</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {["facebookUrl", "instagramUrl", "tiktokUrl"].map((field) => (
+              <div key={field}>
+                <Label htmlFor={field} className="block text-sm font-semibold">{field === 'facebookUrl' ? "URL de Facebook" : field === 'instagramUrl' ? "URL de Instagram" : "URL de TikTok"}</Label>
+                <Input
+                  id={field}
+                  name={field}
+                  value={config[field as keyof FooterConfig]}
+                  onChange={handleInputChange}
+                  className={`mt-2 p-3 rounded-md border ${theme === "dark" ? "bg-gray-700 text-white" : "bg-white text-gray-800"} shadow-sm focus:ring-2 focus:ring-indigo-400 transition-all ease-in-out`}
+                />
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
+        {/* Newsletter */}
+        <Card className="shadow-lg rounded-xl">
+          <CardHeader>
+            <CardTitle className="text-xl font-medium">Newsletter</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div>
+              <Label htmlFor="newsletterTitle" className="block text-sm font-semibold">Título del Newsletter</Label>
+              <Input
+                id="newsletterTitle"
+                name="newsletterTitle"
+                value={config.newsletterTitle}
+                onChange={handleInputChange}
+                className={`mt-2 p-3 rounded-md border ${theme === "dark" ? "bg-gray-700 text-white" : "bg-white text-gray-800"} shadow-sm focus:ring-2 focus:ring-indigo-400 transition-all ease-in-out`}
+              />
+            </div>
+            <div>
+              <Label htmlFor="newsletterDescription" className="block text-sm font-semibold">Descripción del Newsletter</Label>
+              <Textarea
+                id="newsletterDescription"
+                name="newsletterDescription"
+                value={config.newsletterDescription}
+                onChange={handleInputChange}
+                rows={3}
+                className={`mt-2 p-3 rounded-md border ${theme === "dark" ? "bg-gray-700 text-white" : "bg-white text-gray-800"} shadow-sm focus:ring-2 focus:ring-indigo-400 transition-all ease-in-out`}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Copyright */}
+        <Card className="shadow-lg rounded-xl">
+          <CardHeader>
+            <CardTitle className="text-xl font-medium">Copyright</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div>
+              <Label htmlFor="copyrightText" className="block text-sm font-semibold">Texto de Copyright</Label>
+              <Input
+                id="copyrightText"
+                name="copyrightText"
+                value={config.copyrightText}
+                onChange={handleInputChange}
+                className={`mt-2 p-3 rounded-md border ${theme === "dark" ? "bg-gray-700 text-white" : "bg-white text-gray-800"} shadow-sm focus:ring-2 focus:ring-indigo-400 transition-all ease-in-out`}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Botón de guardar */}
+        <div className="text-center">
+          <Button
+            onClick={handleSave}
+            disabled={isSaving}
+            className="mt-6 px-6 py-3 bg-indigo-600 text-white font-semibold rounded-md shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+          >
+            {isSaving ? "Guardando..." : "Guardar Cambios"}
+          </Button>
+        </div>
+      </div>
     </div>
   )
 }
-

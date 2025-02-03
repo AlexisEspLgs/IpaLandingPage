@@ -1,4 +1,4 @@
-"use client"
+'use client'
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
@@ -86,7 +86,6 @@ export function BlogPostForm({ postId }: BlogPostFormProps) {
     e.preventDefault()
     setIsSubmitting(true)
     setError("")
-    console.log("images:", images)
 
     if (images.length === 0) {
       setError("Al menos una imagen es requerida")
@@ -125,25 +124,43 @@ export function BlogPostForm({ postId }: BlogPostFormProps) {
     }
   }
 
+  const handleCancel = () => {
+    router.push("/admin/blog") // Redirige a la lista de blogs
+  }
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-6 p-6 rounded-lg shadow-lg bg-gray-50 dark:bg-gray-800">
       <div>
-        <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+        <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
           Título
         </label>
-        <Input type="text" id="title" value={title} onChange={(e) => setTitle(e.target.value)} required />
+        <Input
+          type="text"
+          id="title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          required
+          className="mt-2 p-3 border-2 border-gray-300 rounded-lg w-full dark:bg-gray-700 dark:text-white dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+        />
       </div>
       <div>
-        <label htmlFor="content" className="block text-sm font-medium text-gray-700">
+        <label htmlFor="content" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
           Contenido
         </label>
-        <Textarea id="content" value={content} onChange={(e) => setContent(e.target.value)} required rows={10} />
+        <Textarea
+          id="content"
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          required
+          rows={10}
+          className="mt-2 p-3 border-2 border-gray-300 rounded-lg w-full dark:bg-gray-700 dark:text-white dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+        />
       </div>
       <div>
-        <label htmlFor="image" className="block text-sm font-medium text-gray-700">
+        <label htmlFor="image" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
           Imágenes
         </label>
-        <div className="mt-1 flex items-center">
+        <div className="mt-2 flex items-center space-x-4">
           <Input
             type="file"
             id="image"
@@ -152,7 +169,11 @@ export function BlogPostForm({ postId }: BlogPostFormProps) {
             disabled={isUploading}
             className="mr-2"
           />
-          <Button type="button" disabled={isUploading}>
+          <Button
+            type="button"
+            disabled={isUploading}
+            className="transition duration-300 ease-in-out hover:scale-105"
+          >
             {isUploading ? "Subiendo..." : "Subir Imagen"}
           </Button>
         </div>
@@ -165,7 +186,7 @@ export function BlogPostForm({ postId }: BlogPostFormProps) {
                   alt={`Imagen ${index + 1}`}
                   width={200}
                   height={200}
-                  className="object-cover w-full h-40 rounded"
+                  className="object-cover w-full h-40 rounded-lg transition-transform duration-300 transform hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                   <Button
@@ -207,23 +228,48 @@ export function BlogPostForm({ postId }: BlogPostFormProps) {
       </div>
       <div>
         <label className="flex items-center">
-          <input type="checkbox" checked={hasPDF} onChange={(e) => setHasPDF(e.target.checked)} className="mr-2" />
-          <span className="text-sm font-medium text-gray-700">Tiene PDF</span>
+          <input
+            type="checkbox"
+            checked={hasPDF}
+            onChange={(e) => setHasPDF(e.target.checked)}
+            className="mr-2"
+          />
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Tiene PDF</span>
         </label>
       </div>
       {hasPDF && (
         <div>
-          <label htmlFor="pdfUrl" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="pdfUrl" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
             URL del PDF
           </label>
-          <Input type="text" id="pdfUrl" value={pdfUrl} onChange={(e) => setPdfUrl(e.target.value)} required={hasPDF} />
+          <Input
+            type="text"
+            id="pdfUrl"
+            value={pdfUrl}
+            onChange={(e) => setPdfUrl(e.target.value)}
+            required={hasPDF}
+            className="mt-2 p-3 border-2 border-gray-300 rounded-lg w-full dark:bg-gray-700 dark:text-white dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
+          />
         </div>
       )}
-      {error && <Alert variant="destructive">{error}</Alert>}
-      <Button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? "Guardando..." : postId ? "Actualizar Post" : "Crear Post"}
-      </Button>
+      {error && <Alert variant="destructive" className="mt-4">{error}</Alert>}
+      <div className="flex space-x-4">
+        <Button
+          type="submit"
+          disabled={isSubmitting}
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white transition duration-300"
+        >
+          {isSubmitting ? "Guardando..." : postId ? "Actualizar Post" : "Crear Post"}
+        </Button>
+        <Button
+          type="button"
+          onClick={handleCancel}
+          variant="outline"
+          className="w-full bg-red-600 text-white hover:bg-red-700 dark:bg-red-600 dark:text-white hover:dark:bg-red-700 transition duration-300"
+>
+          Cancelar
+        </Button>
+      </div>
     </form>
   )
 }
-
