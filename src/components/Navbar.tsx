@@ -27,7 +27,7 @@ export function Navbar({ activeSection, navItems, onNavItemClick }: NavbarProps)
  }, []);
 
  useEffect(() => {
-   let keysPressed: { [key: string]: boolean } = {};
+   const keysPressed: { [key: string]: boolean } = {};
 
    const handleKeyDown = (e: KeyboardEvent) => {
      keysPressed[e.key] = true;
