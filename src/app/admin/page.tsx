@@ -79,8 +79,8 @@ export default function AdminLogin() {
     try {
       await loginUser(email, password)
       router.push("/admin/dashboard")
-    } catch (err) {
-      console.error("Sign in error:", err)
+    } catch {
+      console.error("Sign in error")
       setError("Credenciales inválidas. Por favor, intente nuevamente.")
     } finally {
       setIsLoading(false)
@@ -104,7 +104,7 @@ export default function AdminLogin() {
       } else {
         setError(result.message)
       }
-    } catch (err) {
+    } catch {
       setError("Ocurrió un error inesperado. Por favor, intenta de nuevo.")
     } finally {
       setIsLoading(false)

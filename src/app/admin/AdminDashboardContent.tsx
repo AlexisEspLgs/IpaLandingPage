@@ -41,7 +41,7 @@ export default function AdminDashboardContent() {
     }
 
     fetchCounts()
-  }, [])
+  })
 
   return (
     <div className="space-y-6">

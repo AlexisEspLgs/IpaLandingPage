@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
-import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
@@ -23,7 +22,6 @@ export default function CarouselManagement() {
   const [newAlt, setNewAlt] = useState('')
   const [newOrder, setNewOrder] = useState('')
   const [editingImage, setEditingImage] = useState<CarouselImage | null>(null)
-  const router = useRouter()
   const { theme } = useAppContext()
 
   useEffect(() => {

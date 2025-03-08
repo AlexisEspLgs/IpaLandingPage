@@ -44,7 +44,7 @@ const StatCard = ({
 }: {
   title: string
   value: number
-  icon: React.ComponentType<any>
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>
   colorClass: string
 }) => {
   const count = useCountUp(value, 3) // Incremento más suave

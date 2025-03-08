@@ -30,7 +30,7 @@ export default function RecuperarContrasena() {
       } else {
         setMessage(result.message)
       }
-    } catch (err) {
+    } catch {
       setMessage("Ocurrió un error inesperado. Por favor, intenta de nuevo.")
     } finally {
       setIsLoading(false)
