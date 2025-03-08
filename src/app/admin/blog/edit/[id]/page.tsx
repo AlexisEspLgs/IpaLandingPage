@@ -6,9 +6,9 @@ interface EditBlogPostProps {
   }
 }
 
-export default async function EditBlogPost({ params }: EditBlogPostProps) {
-  // Ensure params.id is available before passing it to the form
-  const postId = await Promise.resolve(params.id)
+export default function EditBlogPost({ params }: EditBlogPostProps) {
+  // Accede directamente al ID desde params
+  const postId = params.id
 
   return (
     <div className="space-y-6">
