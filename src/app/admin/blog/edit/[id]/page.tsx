@@ -1,15 +1,20 @@
-import { BlogPostForm } from "../../blog-post-form"
+"use client"
 
-// Usar la definición de tipos correcta para páginas de Next.js
+import { BlogPostForm } from "../../blog-post-form"
+import { use } from "react"
+
 export default function EditBlogPost({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
+  // Usar el hook 'use' de React para manejar la promesa
+  const { id } = use(params)
+
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">Editar Post</h1>
-      <BlogPostForm postId={params.id} />
+      <BlogPostForm postId={id} />
     </div>
   )
 }
