@@ -2,8 +2,14 @@ import { type NextRequest, NextResponse } from "next/server"
 import { connectToDatabase } from "@/lib/mongodb"
 import { ObjectId } from "mongodb"
 
-// Usando la definición de tipos exacta de Next.js 15
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+// Definición de tipos para los parámetros
+type RouteParams = {
+  params: {
+    id: string
+  }
+}
+
+export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const id = params.id
     const db = await connectToDatabase()
@@ -17,7 +23,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     try {
       objectId = new ObjectId(id)
     } catch (error) {
-      console.log(error)
+      console.log("Invalid post ID:", error)
       return NextResponse.json({ error: "ID de post inválido" }, { status: 400 })
     }
 
@@ -34,8 +40,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-// Usando NextRequest para PUT
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
     const id = params.id
     const data = await request.json()
@@ -50,7 +55,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     try {
       objectId = new ObjectId(id)
     } catch (error) {
-      console.log(error)
+      console.log("Invalid post ID:", error)
       return NextResponse.json({ error: "ID de post inválido" }, { status: 400 })
     }
 
@@ -68,8 +73,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-// Usando NextRequest para DELETE
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
     const id = params.id
     const db = await connectToDatabase()
@@ -83,7 +87,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     try {
       objectId = new ObjectId(id)
     } catch (error) {
-      console.log(error)
+      console.error("Invalid post ID:", error)
       return NextResponse.json({ error: "ID de post inválido" }, { status: 400 })
     }
 
@@ -99,3 +103,4 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     return NextResponse.json({ message: "Error deleting post" }, { status: 500 })
   }
 }
+
