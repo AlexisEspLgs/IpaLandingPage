@@ -35,10 +35,10 @@ export function BlogPostForm({ postId }: BlogPostFormProps) {
     }
   }, [postId])
 
-  // Actualizar la función fetchPost para usar la nueva estructura de API
+  // Actualizar la función fetchPost para usar la estructura de API sin rutas dinámicas
   const fetchPost = async (id: string) => {
     try {
-      const response = await fetch(`/api/blog/${id}`)
+      const response = await fetch(`/api/blog?id=${id}`)
       if (!response.ok) {
         throw new Error("Failed to fetch post")
       }

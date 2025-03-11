@@ -50,7 +50,7 @@ export function BlogPostList() {
     }
   }
 
-  // Actualizar la función handleDelete para usar la nueva estructura de API
+  // Actualizar la función handleDelete para usar la estructura de API sin rutas dinámicas
   const handleDelete = async (id: string | undefined) => {
     if (!id) {
       console.error("Error: Post ID is undefined")
@@ -58,7 +58,7 @@ export function BlogPostList() {
       return
     }
     try {
-      const response = await fetch(`/api/blog/${id}`, { method: "DELETE" })
+      const response = await fetch(`/api/blog?id=${id}`, { method: "DELETE" })
       if (response.ok) {
         setPosts(posts.filter((post) => post.id !== id))
       } else {
