@@ -1,4 +1,6 @@
-'use client'
+"use client"
+
+import type React from "react"
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
@@ -33,9 +35,10 @@ export function BlogPostForm({ postId }: BlogPostFormProps) {
     }
   }, [postId])
 
+  // Actualizar la función fetchPost para usar la nueva estructura de API
   const fetchPost = async (id: string) => {
     try {
-      const response = await fetch(`/api/blog?id=${id}`)
+      const response = await fetch(`/api/blog/${id}`)
       if (!response.ok) {
         throw new Error("Failed to fetch post")
       }
@@ -169,11 +172,7 @@ export function BlogPostForm({ postId }: BlogPostFormProps) {
             disabled={isUploading}
             className="mr-2"
           />
-          <Button
-            type="button"
-            disabled={isUploading}
-            className="transition duration-300 ease-in-out hover:scale-105"
-          >
+          <Button type="button" disabled={isUploading} className="transition duration-300 ease-in-out hover:scale-105">
             {isUploading ? "Subiendo..." : "Subir Imagen"}
           </Button>
         </div>
@@ -228,12 +227,7 @@ export function BlogPostForm({ postId }: BlogPostFormProps) {
       </div>
       <div>
         <label className="flex items-center">
-          <input
-            type="checkbox"
-            checked={hasPDF}
-            onChange={(e) => setHasPDF(e.target.checked)}
-            className="mr-2"
-          />
+          <input type="checkbox" checked={hasPDF} onChange={(e) => setHasPDF(e.target.checked)} className="mr-2" />
           <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Tiene PDF</span>
         </label>
       </div>
@@ -252,7 +246,11 @@ export function BlogPostForm({ postId }: BlogPostFormProps) {
           />
         </div>
       )}
-      {error && <Alert variant="destructive" className="mt-4">{error}</Alert>}
+      {error && (
+        <Alert variant="destructive" className="mt-4">
+          {error}
+        </Alert>
+      )}
       <div className="flex space-x-4">
         <Button
           type="submit"
@@ -266,10 +264,11 @@ export function BlogPostForm({ postId }: BlogPostFormProps) {
           onClick={handleCancel}
           variant="outline"
           className="w-full bg-red-600 text-white hover:bg-red-700 dark:bg-red-600 dark:text-white hover:dark:bg-red-700 transition duration-300"
->
+        >
           Cancelar
         </Button>
       </div>
     </form>
   )
 }
+
