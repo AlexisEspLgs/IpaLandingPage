@@ -2,9 +2,10 @@ import { NextResponse } from "next/server"
 import { connectToDatabase } from "@/lib/mongodb"
 import { ObjectId } from "mongodb"
 
-export async function GET(request: Request, { params }: { params: { id: string } }): Promise<Response> {
+// Simplificando la función GET para asegurar compatibilidad con Next.js 15
+export async function GET(request: Request, context: { params: { id: string } }) {
   try {
-    const id = params.id
+    const id = context.params.id
     const db = await connectToDatabase()
 
     if (!db) {
@@ -16,7 +17,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
     try {
       objectId = new ObjectId(id)
     } catch (error) {
-      console.log(error)
+      console.error("Invalid post ID:", error)
       return NextResponse.json({ error: "ID de post inválido" }, { status: 400 })
     }
 
@@ -33,9 +34,10 @@ export async function GET(request: Request, { params }: { params: { id: string }
   }
 }
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+// Simplificando la función PUT
+export async function PUT(request: Request, context: { params: { id: string } }) {
   try {
-    const id = params.id
+    const id = context.params.id
     const data = await request.json()
     const db = await connectToDatabase()
 
@@ -48,7 +50,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     try {
       objectId = new ObjectId(id)
     } catch (error) {
-      console.log(error)
+      console.error("Invalid post ID:", error)
       return NextResponse.json({ error: "ID de post inválido" }, { status: 400 })
     }
 
@@ -66,9 +68,10 @@ export async function PUT(request: Request, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+// Simplificando la función DELETE
+export async function DELETE(request: Request, context: { params: { id: string } }) {
   try {
-    const id = params.id
+    const id = context.params.id
     const db = await connectToDatabase()
 
     if (!db) {
@@ -80,8 +83,8 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
     try {
       objectId = new ObjectId(id)
     } catch (error) {
-      console.log(error)
-      return NextResponse.json({ error: "ID de post inválido" }, { status: 400 })
+      console.error("Invalid post ID:", error)
+      return NextResponse.json({ error: "ID de post inválido"}, { status: 400 })
     }
 
     const result = await db.collection("blogposts").deleteOne({ _id: objectId })
@@ -90,7 +93,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
       return NextResponse.json({ error: "Post no encontrado" }, { status: 404 })
     }
 
-    return new NextResponse(null, { status: 204 })
+    return NextResponse.json({ success: true }, { status: 200 })
   } catch (error) {
     console.error("Error deleting post:", error)
     return NextResponse.json({ message: "Error deleting post" }, { status: 500 })
