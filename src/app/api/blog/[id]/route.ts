@@ -2,14 +2,8 @@ import { NextRequest, NextResponse } from "next/server"
 import { connectToDatabase } from "@/lib/mongodb"
 import { ObjectId } from "mongodb"
 
-// Definición de tipos para los parámetros
-type RouteParams = {
-  params: {
-    id: string
-  }
-}
-
-export async function GET(request: NextRequest, { params }: RouteParams) {
+// La función GET ya no requiere el tipo RouteParams explícito, Next.js maneja los parámetros automáticamente.
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const id = params.id
     const db = await connectToDatabase()
@@ -40,7 +34,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   }
 }
 
-export async function PUT(request: NextRequest, { params }: RouteParams) {
+export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const id = params.id
     const data = await request.json()
@@ -73,7 +67,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: RouteParams) {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     const id = params.id
     const db = await connectToDatabase()
