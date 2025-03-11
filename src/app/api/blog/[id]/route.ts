@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { connectToDatabase } from "@/lib/mongodb"
 import { ObjectId } from "mongodb"
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: Request, { params }: { params: { id: string } }): Promise<Response> {
   try {
     const id = params.id
     const db = await connectToDatabase()
@@ -15,7 +15,8 @@ export async function GET(request: Request, { params }: { params: { id: string }
     let objectId: ObjectId
     try {
       objectId = new ObjectId(id)
-    } catch {
+    } catch (error) {
+      console.log(error)
       return NextResponse.json({ error: "ID de post inválido" }, { status: 400 })
     }
 
@@ -47,7 +48,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     try {
       objectId = new ObjectId(id)
     } catch (error) {
-    console.error("Error fetching post:", error)
+      console.log(error)
       return NextResponse.json({ error: "ID de post inválido" }, { status: 400 })
     }
 
@@ -79,8 +80,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
     try {
       objectId = new ObjectId(id)
     } catch (error) {
-        
-    console.error("Error fetching post:", error)
+      console.log(error)
       return NextResponse.json({ error: "ID de post inválido" }, { status: 400 })
     }
 
