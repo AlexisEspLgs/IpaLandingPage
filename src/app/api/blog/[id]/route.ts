@@ -1,11 +1,11 @@
-import { NextResponse } from "next/server"
+import { type NextRequest, NextResponse } from "next/server"
 import { connectToDatabase } from "@/lib/mongodb"
 import { ObjectId } from "mongodb"
 
-// Simplificando la función GET para asegurar compatibilidad con Next.js 15
-export async function GET(request: Request, context: { params: { id: string } }) {
+// Usando la definición de tipos exacta de Next.js 15
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const id = context.params.id
+    const id = params.id
     const db = await connectToDatabase()
 
     if (!db) {
@@ -17,7 +17,7 @@ export async function GET(request: Request, context: { params: { id: string } })
     try {
       objectId = new ObjectId(id)
     } catch (error) {
-      console.error("Invalid post ID:", error)
+      console.log(error)
       return NextResponse.json({ error: "ID de post inválido" }, { status: 400 })
     }
 
@@ -34,10 +34,10 @@ export async function GET(request: Request, context: { params: { id: string } })
   }
 }
 
-// Simplificando la función PUT
-export async function PUT(request: Request, context: { params: { id: string } }) {
+// Usando NextRequest para PUT
+export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const id = context.params.id
+    const id = params.id
     const data = await request.json()
     const db = await connectToDatabase()
 
@@ -50,7 +50,7 @@ export async function PUT(request: Request, context: { params: { id: string } })
     try {
       objectId = new ObjectId(id)
     } catch (error) {
-      console.error("Invalid post ID:", error)
+      console.log(error)
       return NextResponse.json({ error: "ID de post inválido" }, { status: 400 })
     }
 
@@ -68,10 +68,10 @@ export async function PUT(request: Request, context: { params: { id: string } })
   }
 }
 
-// Simplificando la función DELETE
-export async function DELETE(request: Request, context: { params: { id: string } }) {
+// Usando NextRequest para DELETE
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const id = context.params.id
+    const id = params.id
     const db = await connectToDatabase()
 
     if (!db) {
@@ -83,8 +83,8 @@ export async function DELETE(request: Request, context: { params: { id: string }
     try {
       objectId = new ObjectId(id)
     } catch (error) {
-      console.error("Invalid post ID:", error)
-      return NextResponse.json({ error: "ID de post inválido"}, { status: 400 })
+      console.log(error)
+      return NextResponse.json({ error: "ID de post inválido" }, { status: 400 })
     }
 
     const result = await db.collection("blogposts").deleteOne({ _id: objectId })
@@ -93,7 +93,7 @@ export async function DELETE(request: Request, context: { params: { id: string }
       return NextResponse.json({ error: "Post no encontrado" }, { status: 404 })
     }
 
-    return NextResponse.json({ success: true }, { status: 200 })
+    return NextResponse.json({ success: true })
   } catch (error) {
     console.error("Error deleting post:", error)
     return NextResponse.json({ message: "Error deleting post" }, { status: 500 })
