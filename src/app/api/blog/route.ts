@@ -1,154 +1,84 @@
 import { NextResponse } from "next/server"
-import { connectToDatabase } from "@/lib/mongodb"
-import { ObjectId } from "mongodb"
+import dbConnect from "@/lib/mongodb"
+import BlogPost from "@/models/BlogPost"
+import mongoose from "mongoose"
 
-// Función GET unificada que puede obtener todos los posts o uno específico por ID
 export async function GET(request: Request) {
   try {
+    await dbConnect()
     const { searchParams } = new URL(request.url)
-    const idParam = searchParams.get("id")
-    const db = await connectToDatabase()
+    const id = searchParams.get("id")
 
-    if (!db) {
-      return NextResponse.json({ error: "Error de conexión a la base de datos" }, { status: 500 })
+    if (id) {
+      const post = await BlogPost.findById(id)
+      return post
+        ? NextResponse.json({ ...post.toObject(), id: post._id.toString() })
+        : NextResponse.json({ error: "Post not found" }, { status: 404 })
     }
 
-    // Si se proporciona un ID, obtener un post específico
-    if (idParam) {
-      // Verificar si el ID es un ObjectId válido
-      let objectId: ObjectId
-      try {
-        objectId = new ObjectId(idParam)
-      } catch {
-        return NextResponse.json({ error: "ID de post inválido" }, { status: 400 })
-      }
-
-      const post = await db.collection("blogposts").findOne({ _id: objectId })
-
-      if (!post) {
-        return NextResponse.json({ error: "Post not found" }, { status: 404 })
-      }
-
-      return NextResponse.json(post)
-    }
-
-    // Si no se proporciona un ID, obtener todos los posts
-    const posts = await db.collection("blogposts").find({}).sort({ date: -1 }).toArray()
-    return NextResponse.json(posts)
+    const posts = await BlogPost.find({}).sort({ date: -1 })
+    return NextResponse.json(
+      posts.map((post) => ({
+        ...post.toObject(),
+        id: post._id.toString(),
+      })),
+    )
   } catch (error) {
-    console.error("Error fetching posts:", error)
-    return NextResponse.json({ error: "Error fetching posts" }, { status: 500 })
+    console.error("Error fetching blog posts:", error)
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
   }
 }
 
-// Función POST para crear un nuevo post
 export async function POST(request: Request) {
+  await dbConnect()
   try {
-    const data = await request.json()
-    const db = await connectToDatabase()
+    const body = await request.json()
 
-    if (!db) {
-      return NextResponse.json({ error: "Error de conexión a la base de datos" }, { status: 500 })
-    }
-
-    // Validar datos requeridos
-    if (!data.title || !data.content || !data.images || data.images.length === 0) {
+    // Validate required fields
+    if (!body.title || !body.content || !body.images || body.images.length === 0) {
       return NextResponse.json({ error: "Title, content, and at least one image are required." }, { status: 400 })
     }
 
-    // Asegurar que la fecha esté en formato correcto
-    if (!data.date) {
-      data.date = new Date().toISOString()
-    }
-
-    const result = await db.collection("blogposts").insertOne(data)
-    const newPost = await db.collection("blogposts").findOne({ _id: result.insertedId })
-
-    return NextResponse.json(newPost, { status: 201 })
+    const post = await BlogPost.create(body)
+    return NextResponse.json(post, { status: 201 })
   } catch (error) {
     console.error("Error creating post:", error)
-    return NextResponse.json({ error: "Error creating post" }, { status: 500 })
+    if (error instanceof mongoose.Error.ValidationError) {
+      const validationErrors = Object.values(error.errors).map((err) => err.message)
+      return NextResponse.json({ error: "Validation error", details: validationErrors }, { status: 400 })
+    }
+    return NextResponse.json({ error: "Failed to create post" }, { status: 500 })
   }
 }
 
-// Función PUT para actualizar un post existente
 export async function PUT(request: Request) {
+  await dbConnect()
   try {
-    const data = await request.json()
-    const id = data.id // El ID debe venir en el cuerpo de la solicitud
-
-    if (!id) {
-      return NextResponse.json({ error: "ID is required" }, { status: 400 })
+    const body = await request.json()
+    const post = await BlogPost.findByIdAndUpdate(body.id, body, { new: true, runValidators: true })
+    if (!post) {
+      return NextResponse.json({ error: "Post not found" }, { status: 404 })
     }
-
-    const db = await connectToDatabase()
-
-    if (!db) {
-      return NextResponse.json({ error: "Error de conexión a la base de datos" }, { status: 500 })
-    }
-
-    // Verificar si el ID es un ObjectId válido
-    let objectId: ObjectId
-    try {
-      objectId = new ObjectId(id)
-    } catch (error) {
-      console.log(error)
-      return NextResponse.json({ error: "ID de post inválido" }, { status: 400 })
-    }
-
-    // Eliminar el ID del objeto de datos para no sobrescribirlo
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { id: _, ...updateData } = data
-
-    const result = await db.collection("blogposts").updateOne({ _id: objectId }, { $set: updateData })
-
-    if (result.matchedCount === 0) {
-      return NextResponse.json({ error: "Post no encontrado" }, { status: 404 })
-    }
-
-    const updatedPost = await db.collection("blogposts").findOne({ _id: objectId })
-    return NextResponse.json(updatedPost)
+    return NextResponse.json(post)
   } catch (error) {
     console.error("Error updating post:", error)
-    return NextResponse.json({ error: "Error updating post" }, { status: 500 })
+    return NextResponse.json({ error: "Failed to update post" }, { status: 500 })
   }
 }
 
-// Función DELETE para eliminar un post
 export async function DELETE(request: Request) {
+  await dbConnect()
+  const { searchParams } = new URL(request.url)
+  const id = searchParams.get("id")
   try {
-    const { searchParams } = new URL(request.url)
-    const idParam = searchParams.get("id")
-
-    if (!idParam) {
-      return NextResponse.json({ error: "ID is required" }, { status: 400 })
+    const deletedPost = await BlogPost.findByIdAndDelete(id)
+    if (!deletedPost) {
+      return NextResponse.json({ error: "Post not found" }, { status: 404 })
     }
-
-    const db = await connectToDatabase()
-
-    if (!db) {
-      return NextResponse.json({ error: "Error de conexión a la base de datos" }, { status: 500 })
-    }
-
-    // Verificar si el ID es un ObjectId válido
-    let objectId: ObjectId
-    try {
-      objectId = new ObjectId(idParam)
-    } catch (error) {
-      console.log(error)
-      return NextResponse.json({ error: "ID de post inválido" }, { status: 400 })
-    }
-
-    const result = await db.collection("blogposts").deleteOne({ _id: objectId })
-
-    if (result.deletedCount === 0) {
-      return NextResponse.json({ error: "Post no encontrado" }, { status: 404 })
-    }
-
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error("Error deleting post:", error)
-    return NextResponse.json({ error: "Error deleting post" }, { status: 500 })
+    return NextResponse.json({ error: "Failed to delete post" }, { status: 500 })
   }
 }
 
