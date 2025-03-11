@@ -1,15 +1,30 @@
 "use client"
 
+import type React from "react"
+
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
-import { DragDropContext, Droppable, Draggable, type DropResult, type DraggableProvided } from "react-beautiful-dnd"
-import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Label } from "@/components/ui/label"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { useAppContext } from "@/contexts/AppContext"
+import { motion } from "framer-motion"
+import { Users, Upload, Save, RefreshCw, ImageIcon, Trash2, Plus, ArrowUp, ArrowDown } from "lucide-react"
 import { uploadImage } from "@/lib/uploadImage"
-import { Trash2, MoveUp, MoveDown } from "lucide-react"
 
 interface IpaleeImage {
   id: string
@@ -21,68 +36,119 @@ export default function AdminIpaleePage() {
   const [images, setImages] = useState<IpaleeImage[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
-  const { theme } = useAppContext()
+  const [isUploading, setIsUploading] = useState(false)
+  const [message, setMessage] = useState("")
+  const [messageType, setMessageType] = useState<"success" | "error">("success")
+  const {  } = useAppContext()
   const router = useRouter()
 
+  // Animaciones
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  }
+
+  const item = {
+    hidden: { y: 20, opacity: 0 },
+    show: { y: 0, opacity: 1 },
+  }
+
   useEffect(() => {
-    const fetchImages = async () => {
-      const response = await fetch("/api/admin/ipalee-config")
-      if (response.ok) {
-        const data = await response.json()
-        setImages(data.images)
-      }
-      setIsLoading(false)
-    }
     fetchImages()
   }, [])
 
+  const fetchImages = async () => {
+    setIsLoading(true)
+    try {
+      const response = await fetch("/api/admin/ipalee-config")
+      if (response.ok) {
+        const data = await response.json()
+        setImages(data.images || [])
+      } else {
+        throw new Error("Error al cargar las imágenes")
+      }
+    } catch (error) {
+      console.error("Error fetching ipalee images:", error)
+      setMessageType("error")
+      setMessage("Error al cargar las imágenes de Ipalee")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (file && images.length < 10) {
-      try {
-        const imageUrl = await uploadImage(file)
-        const newImage: IpaleeImage = {
-          id: Date.now().toString(),
-          url: imageUrl,
-          order: images.length,
-        }
-        setImages([...images, newImage])
-      } catch (error) {
-        console.error("Error uploading image:", error)
-        alert("Error al subir la imagen. Por favor, inténtalo de nuevo.")
+    if (!file) return
+
+    setIsUploading(true)
+    setMessage("")
+
+    try {
+      const imageUrl = await uploadImage(file)
+      const newImage: IpaleeImage = {
+        id: Date.now().toString(), // ID temporal
+        url: imageUrl,
+        order: images.length, // Asignar el siguiente orden
       }
-    } else if (images.length >= 10) {
-      alert("Has alcanzado el límite máximo de 10 imágenes.")
+      setImages([...images, newImage])
+      setMessageType("success")
+      setMessage("Imagen subida correctamente")
+      setTimeout(() => setMessage(""), 3000)
+    } catch (error) {
+      console.error("Error uploading image:", error)
+      setMessageType("error")
+      setMessage("Error al subir la imagen. Por favor, inténtalo de nuevo.")
+    } finally {
+      setIsUploading(false)
     }
   }
 
   const handleDeleteImage = (id: string) => {
-    setImages(images.filter((img) => img.id !== id))
+    setImages(images.filter((image) => image.id !== id))
+    setMessageType("success")
+    setMessage("Imagen eliminada correctamente")
+    setTimeout(() => setMessage(""), 3000)
   }
 
   const handleMoveImage = (id: string, direction: "up" | "down") => {
-    const index = images.findIndex((img) => img.id === id)
-    if ((direction === "up" && index > 0) || (direction === "down" && index < images.length - 1)) {
+    const index = images.findIndex((image) => image.id === id)
+    if (index === -1) return
+
+    if (direction === "up" && index > 0) {
       const newImages = [...images]
       const temp = newImages[index]
-      newImages[index] = newImages[index + (direction === "up" ? -1 : 1)]
-      newImages[index + (direction === "up" ? -1 : 1)] = temp
-      setImages(newImages.map((img, i) => ({ ...img, order: i })))
+      newImages[index] = newImages[index - 1]
+      newImages[index - 1] = temp
+
+      // Actualizar órdenes
+      newImages.forEach((image, i) => {
+        image.order = i
+      })
+
+      setImages(newImages)
+    } else if (direction === "down" && index < images.length - 1) {
+      const newImages = [...images]
+      const temp = newImages[index]
+      newImages[index] = newImages[index + 1]
+      newImages[index + 1] = temp
+
+      // Actualizar órdenes
+      newImages.forEach((image, i) => {
+        image.order = i
+      })
+
+      setImages(newImages)
     }
-  }
-
-  const onDragEnd = (result: DropResult) => {
-    if (!result.destination) return
-
-    const newImages = Array.from(images)
-    const [reorderedItem] = newImages.splice(result.source.index, 1)
-    newImages.splice(result.destination.index, 0, reorderedItem)
-
-    setImages(newImages.map((img, i) => ({ ...img, order: i })))
   }
 
   const handleSave = async () => {
     setIsSaving(true)
+    setMessage("")
     try {
       const response = await fetch("/api/admin/ipalee-config", {
         method: "POST",
@@ -90,106 +156,226 @@ export default function AdminIpaleePage() {
         body: JSON.stringify({ images }),
       })
       if (response.ok) {
-        alert("Configuración guardada con éxito")
+        setMessageType("success")
+        setMessage("Configuración guardada con éxito")
+        setTimeout(() => setMessage(""), 3000)
         router.refresh()
       } else {
         throw new Error("Error al guardar la configuración")
       }
     } catch (error) {
       console.error("Error saving config:", error)
-      alert("Error al guardar la configuración. Por favor, inténtalo de nuevo.")
+      setMessageType("error")
+      setMessage("Error al guardar la configuración. Por favor, inténtalo de nuevo.")
     } finally {
       setIsSaving(false)
     }
   }
 
   if (isLoading) {
-    return <div className="text-center p-4">Cargando imágenes...</div>
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+          className="w-16 h-16 border-4 rounded-full border-blue-500 border-t-transparent"
+        />
+      </div>
+    )
   }
 
   return (
-    <div className={`space-y-6 ${theme === "dark" ? "text-white" : "text-gray-800"}`}>
-      <h1 className="text-3xl font-bold">Editar Sección de Ipalee</h1>
-      <Card>
-        <CardHeader>
-          <CardTitle>Gestión de Imágenes</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <label htmlFor="imageUpload" className="block text-sm font-medium mb-1">
-              Subir Nueva Imagen
-            </label>
-            <Input
-              id="imageUpload"
-              type="file"
-              onChange={handleImageUpload}
-              accept="image/*"
-              className={theme === "dark" ? "bg-gray-700 text-white" : ""}
-              disabled={images.length >= 10}
-            />
-            {images.length >= 10 && (
-              <p className="text-sm text-red-500 mt-1">Has alcanzado el límite máximo de 10 imágenes.</p>
-            )}
-          </div>
-          <DragDropContext onDragEnd={onDragEnd}>
-            <Droppable droppableId="images">
-              {(provided) => (
-                <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-4">
-                  {images.map((image, index) => (
-                    <Draggable key={image.id} draggableId={image.id} index={index}>
-                      {(provided: DraggableProvided) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                          className={`flex items-center space-x-4 p-2 rounded-lg ${
-                            theme === "dark" ? "bg-gray-800" : "bg-gray-100"
-                          }`}
-                        >
-                          <Image
-                            src={image.url || "/placeholder.svg"}
-                            alt={`Ipalee ${index + 1}`}
-                            width={100}
-                            height={100}
-                            className="rounded-md"
-                          />
-                          <div className="flex-grow">{`Imagen ${index + 1}`}</div>
-                          <div className="flex space-x-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleMoveImage(image.id, "up")}
-                              disabled={index === 0}
-                            >
-                              <MoveUp className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleMoveImage(image.id, "down")}
-                              disabled={index === images.length - 1}
-                            >
-                              <MoveDown className="h-4 w-4" />
-                            </Button>
-                            <Button size="sm" variant="destructive" onClick={() => handleDeleteImage(image.id)}>
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
+    <motion.div variants={container} initial="hidden" animate="show" className="p-6 space-y-6">
+      {/* Header */}
+      <div className="w-full bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-900 dark:to-purple-900 text-white rounded-lg shadow-lg">
+        <div className="px-6 py-8">
+          <motion.div variants={item} className="flex items-center space-x-3">
+            <Users className="h-8 w-8" />
+            <h1 className="text-3xl font-bold">Sección Ipalee</h1>
+          </motion.div>
+          <motion.p variants={item} className="text-blue-100 dark:text-blue-200 mt-2">
+            Administra las imágenes de la sección de jóvenes Ipalee
+          </motion.p>
+        </div>
+      </div>
+
+      {/* Mensajes de éxito o error */}
+      {message && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className={`p-4 mb-4 ${
+            messageType === "success"
+              ? "bg-green-100 text-green-700 border border-green-300 dark:bg-green-900 dark:text-green-300 dark:border-green-800"
+              : "bg-red-100 text-red-700 border border-red-300 dark:bg-red-900 dark:text-red-300 dark:border-red-800"
+          } rounded-lg`}
+        >
+          <Alert variant={messageType === "success" ? "default" : "destructive"}>
+            <AlertDescription>{message}</AlertDescription>
+          </Alert>
+        </motion.div>
+      )}
+
+      {/* Sección principal */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        {/* Panel de subida de imágenes */}
+        <motion.div variants={item} className="lg:col-span-1">
+          <Card className="border-0 shadow-lg overflow-hidden">
+            <div className="h-1 bg-green-500"></div>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xl font-bold flex items-center gap-2">
+                <Upload className="h-5 w-5" />
+                Nueva Imagen
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="imageUpload" className="text-sm font-medium">
+                  Subir Imagen
+                </Label>
+                <Input
+                  id="imageUpload"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  disabled={isUploading}
+                  className="cursor-pointer"
+                />
+                {isUploading && (
+                  <div className="flex items-center mt-2 text-sm text-blue-600 dark:text-blue-400">
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    Subiendo imagen...
+                  </div>
+                )}
+              </div>
+
+              <Button
+                onClick={handleSave}
+                className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+                disabled={isSaving}
+              >
+                {isSaving ? (
+                  <>
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                    Guardando...
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-4 w-4 mr-2" />
+                    Guardar Cambios
+                  </>
+                )}
+              </Button>
+
+              <Button variant="outline" onClick={fetchImages} className="w-full flex items-center justify-center">
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Recargar Imágenes
+              </Button>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Panel de imágenes */}
+        <motion.div variants={item} className="lg:col-span-3">
+          <Card className="border-0 shadow-lg overflow-hidden">
+            <div className="h-1 bg-blue-500"></div>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xl font-bold flex items-center gap-2">
+                <ImageIcon className="h-5 w-5" />
+                Imágenes de Ipalee ({images.length})
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {images.length === 0 ? (
+                <div className="text-center py-12">
+                  <ImageIcon className="h-16 w-16 mx-auto text-gray-400 mb-4" />
+                  <h3 className="text-xl font-medium text-gray-600 dark:text-gray-300">
+                    No hay imágenes en la sección Ipalee
+                  </h3>
+                  <p className="text-gray-500 dark:text-gray-400 mt-2">Comienza subiendo tu primera imagen</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                  {images.map((image) => (
+                    <div
+                      key={image.id}
+                      className="border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+                    >
+                      <div className="relative aspect-square">
+                        <Image
+                          src={image.url || "/placeholder.svg"}
+                          alt={`Ipalee ${image.order + 1}`}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                      <div className="p-3">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 rounded-full">
+                            Orden: {image.order}
+                          </span>
                         </div>
-                      )}
-                    </Draggable>
+                        <div className="flex justify-between gap-1">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleMoveImage(image.id, "up")}
+                            disabled={image.order === 0}
+                            className="flex-1"
+                          >
+                            <ArrowUp className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleMoveImage(image.id, "down")}
+                            disabled={image.order === images.length - 1}
+                            className="flex-1"
+                          >
+                            <ArrowDown className="h-4 w-4" />
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="destructive" size="sm" className="flex-1">
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Esta acción no se puede deshacer. Esto eliminará permanentemente la imagen.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => handleDeleteImage(image.id)}>
+                                  Eliminar
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </div>
+                    </div>
                   ))}
-                  {provided.placeholder}
+
+                  {/* Botón para añadir más imágenes */}
+                  <div
+                    className="border-2 border-dashed rounded-lg p-4 flex flex-col items-center justify-center h-full cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                    onClick={() => document.getElementById("imageUpload")?.click()}
+                  >
+                    <Plus className="h-8 w-8 text-gray-400 mb-2" />
+                    <p className="text-sm text-muted-foreground">Añadir imagen</p>
+                  </div>
                 </div>
               )}
-            </Droppable>
-          </DragDropContext>
-        </CardContent>
-      </Card>
-      <Button onClick={handleSave} disabled={isSaving}>
-        {isSaving ? "Guardando..." : "Guardar Cambios"}
-      </Button>
-    </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
+    </motion.div>
   )
 }
 

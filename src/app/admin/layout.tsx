@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter, usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -19,6 +19,7 @@ import {
   Bell,
   Mail,
   FootprintsIcon as FooterIcon,
+  X,
 } from "lucide-react"
 import { useAuth } from "@/contexts/AuthContext"
 import { useAppContext } from "@/contexts/AppContext"
@@ -34,12 +35,37 @@ export default function AdminLayout({
   const { theme } = useAppContext()
   const router = useRouter()
   const pathname = usePathname()
+  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [isMobile, setIsMobile] = useState(false)
+
+  // Detectar si es dispositivo móvil
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024)
+      if (window.innerWidth < 1024) {
+        setSidebarOpen(false)
+      } else {
+        setSidebarOpen(true)
+      }
+    }
+
+    checkMobile()
+    window.addEventListener("resize", checkMobile)
+    return () => window.removeEventListener("resize", checkMobile)
+  }, [])
 
   useEffect(() => {
     if (!loading && !user && pathname !== "/admin") {
       router.push("/admin")
     }
   }, [user, loading, router, pathname])
+
+  // Cerrar sidebar automáticamente en móvil al cambiar de ruta
+  useEffect(() => {
+    if (isMobile) {
+      setSidebarOpen(false)
+    }
+  }, [pathname, isMobile])
 
   const handleLogout = async () => {
     try {
@@ -52,7 +78,7 @@ export default function AdminLayout({
 
   if (loading) {
     return (
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -65,8 +91,8 @@ export default function AdminLayout({
           }}
           transition={{
             duration: 2,
-            repeat: Infinity,
-            ease: "easeInOut"
+            repeat: Number.POSITIVE_INFINITY,
+            ease: "easeInOut",
           }}
           className={`w-12 h-12 border-4 rounded-full ${theme === "dark" ? "border-purple-500 border-t-transparent" : "border-blue-500 border-t-transparent"}`}
         />
@@ -98,134 +124,159 @@ export default function AdminLayout({
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className={`flex h-screen ${theme === "dark" ? "bg-gray-900" : "bg-gray-100"}`}
-    >
-      <motion.aside
-        initial={{ x: -100, opacity: 0 }}
-        animate={{ x: 0, opacity: 1 }}
-        transition={{ type: "spring", damping: 20, stiffness: 100 }}
-        className={`w-full md:w-64 ${theme === "dark" ? "bg-gray-800" : "bg-white"} shadow-lg relative z-10`}
-      >
+    <div className={`flex h-screen overflow-hidden ${theme === "dark" ? "bg-gray-900" : "bg-gray-100"}`}>
+      {/* Overlay para móvil cuando el sidebar está abierto */}
+      {isMobile && sidebarOpen && (
         <motion.div
-          initial={{ y: -20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="p-4"
-        >
-          <h2 className={`text-2xl font-semibold ${theme === "dark" ? "text-gray-200" : "text-gray-800"}`}>
-            Admin Panel
-          </h2>
-        </motion.div>
-        <nav className="mt-4">
-          {menuItems.map((item, index) => (
-            <motion.div
-              key={item.href}
-              initial={{ x: -50, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: index * 0.05 }}
-            >
-              <Link href={item.href}>
-                <motion.span
-                  whileHover={{ x: 4 }}
-                  whileTap={{ scale: 0.98 }}
-                  className={`flex items-center px-4 py-2 transition-colors duration-200 ${
-                    theme === "dark" 
-                      ? "text-gray-300 hover:bg-gray-700" 
-                      : "text-gray-700 hover:bg-gray-200"
-                  } ${
-                    pathname === item.href 
-                      ? theme === "dark"
-                        ? "bg-gray-700 border-r-4 border-purple-500"
-                        : "bg-gray-200 border-r-4 border-blue-500"
-                      : ""
-                  }`}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.5 }}
+          exit={{ opacity: 0 }}
+          onClick={() => setSidebarOpen(false)}
+          className="fixed inset-0 bg-black z-20"
+        />
+      )}
+
+      {/* Sidebar */}
+      <AnimatePresence mode="wait">
+        {sidebarOpen && (
+          <motion.aside
+            initial={isMobile ? { x: -280 } : { x: 0 }}
+            animate={{ x: 0 }}
+            exit={isMobile ? { x: -280 } : { x: 0 }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            className={`${
+              isMobile ? "fixed left-0 top-0 bottom-0 z-30 w-[260px] shadow-xl" : "w-56 relative"
+            } ${theme === "dark" ? "bg-gray-800" : "bg-white"} flex flex-col h-full`}
+          >
+            <div className="flex items-center justify-between p-3 border-b border-gray-700">
+              <h2 className={`text-lg font-bold ${theme === "dark" ? "text-gray-200" : "text-gray-800"}`}>
+                Admin Panel
+              </h2>
+              {isMobile && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setSidebarOpen(false)}
+                  className={`${theme === "dark" ? "text-gray-200 hover:bg-gray-700" : "text-gray-800 hover:bg-gray-200"}`}
                 >
-                  <item.icon className={`w-5 h-5 mr-2 transition-transform duration-200 ${
-                    pathname === item.href ? "scale-110" : ""
-                  }`} />
-                  {item.label}
-                </motion.span>
-              </Link>
-            </motion.div>
-          ))}
-        </nav>
-        <motion.div
-          initial={{ y: 50, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.5 }}
-          className="absolute bottom-0 w-full md:w-64 p-4"
+                  <X className="h-5 w-5" />
+                </Button>
+              )}
+            </div>
+
+            {/* Scrollable menu */}
+            <div className="flex-1 overflow-y-auto py-2">
+              <nav className="space-y-1 px-2">
+                {menuItems.map((item, index) => (
+                  <motion.div
+                    key={item.href}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.03 }}
+                  >
+                    <Link href={item.href}>
+                      <div
+                        className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
+                          pathname === item.href
+                            ? theme === "dark"
+                              ? "bg-gray-700 text-white"
+                              : "bg-blue-50 text-blue-700"
+                            : theme === "dark"
+                              ? "text-gray-300 hover:bg-gray-700 hover:text-white"
+                              : "text-gray-700 hover:bg-gray-100"
+                        }`}
+                      >
+                        <item.icon
+                          className={`flex-shrink-0 h-4 w-4 mr-2 ${
+                            pathname === item.href
+                              ? theme === "dark"
+                                ? "text-white"
+                                : "text-blue-700"
+                              : theme === "dark"
+                                ? "text-gray-400"
+                                : "text-gray-500"
+                          }`}
+                        />
+                        <span>{item.label}</span>
+                      </div>
+                    </Link>
+                  </motion.div>
+                ))}
+              </nav>
+            </div>
+
+            {/* Logout button */}
+            <div className="p-3 border-t border-gray-700">
+              <Button
+                onClick={handleLogout}
+                className="w-full bg-red-500 hover:bg-red-600 text-white transition-all duration-200"
+                size="sm"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Cerrar Sesión
+              </Button>
+            </div>
+          </motion.aside>
+        )}
+      </AnimatePresence>
+
+      {/* Main content */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Top navigation bar */}
+        
+
+        {/* Page content - eliminado el padding extra para usar todo el espacio */}
+        <main
+          className={`flex-1 overflow-y-auto ${theme === "dark" ? "bg-gray-900 text-gray-100" : "bg-gray-100 text-gray-900"}`}
         >
-          <Button
-            onClick={handleLogout}
-            className="w-full bg-red-500 hover:bg-red-600 text-white transition-all duration-200 hover:scale-[1.02]"
-          >
+          <AnimatePresence mode="wait">
             <motion.div
-              className="flex items-center justify-center w-full"
-              whileTap={{ scale: 0.95 }}
+              key={pathname}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+              className="h-full w-full"
             >
-              <LogOut className="w-4 h-4 mr-2" />
-              Logout
+              {children}
             </motion.div>
-          </Button>
-        </motion.div>
-      </motion.aside>
+          </AnimatePresence>
 
-      <motion.main
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-        className={`flex-1 p-8 overflow-y-auto relative ${
-          theme === "dark" ? "bg-gray-900 text-gray-100" : "bg-gray-100 text-gray-900"
-        }`}
-      >
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={pathname}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.2 }}
-          >
-            {children}
-          </motion.div>
-        </AnimatePresence>
-
-        {/* Elementos decorativos */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <motion.div
-            animate={{
-              scale: [1, 1.1, 1],
-              opacity: [0.03, 0.05, 0.03],
-            }}
-            transition={{
-              duration: 8,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-            className={`absolute top-1/4 right-1/4 w-96 h-96 rounded-full blur-3xl ${
-              theme === "dark" ? "bg-purple-500" : "bg-blue-500"
-            }`}
-          />
-          <motion.div
-            animate={{
-              scale: [1, 0.9, 1],
-              opacity: [0.02, 0.04, 0.02],
-            }}
-            transition={{
-              duration: 8,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 1
-            }}
-            className={`absolute bottom-1/4 left-1/4 w-96 h-96 rounded-full blur-3xl ${
-              theme === "dark" ? "bg-violet-500" : "bg-indigo-500"
-            }`}
-          />
-        </div>
-      </motion.main>
-    </motion.div>
+          {/* Elementos decorativos */}
+          <div className="fixed inset-0 pointer-events-none overflow-hidden">
+            <motion.div
+              animate={{
+                scale: [1, 1.1, 1],
+                opacity: [0.02, 0.04, 0.02],
+              }}
+              transition={{
+                duration: 8,
+                repeat: Number.POSITIVE_INFINITY,
+                ease: "easeInOut",
+              }}
+              className={`absolute top-1/4 right-1/4 w-96 h-96 rounded-full blur-3xl ${
+                theme === "dark" ? "bg-purple-500/20" : "bg-blue-500/10"
+              }`}
+            />
+            <motion.div
+              animate={{
+                scale: [1, 0.9, 1],
+                opacity: [0.01, 0.03, 0.01],
+              }}
+              transition={{
+                duration: 8,
+                repeat: Number.POSITIVE_INFINITY,
+                ease: "easeInOut",
+                delay: 1,
+              }}
+              className={`absolute bottom-1/4 left-1/4 w-96 h-96 rounded-full blur-3xl ${
+                theme === "dark" ? "bg-violet-500/20" : "bg-indigo-500/10"
+              }`}
+            />
+          </div>
+        </main>
+      </div>
+    </div>
   )
 }
+

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import dbConnect  from "@/lib/mongodb"
+import dbConnect from "@/lib/mongodb"
 import BlogPost from "@/models/BlogPost"
 import mongoose from "mongoose"
 
