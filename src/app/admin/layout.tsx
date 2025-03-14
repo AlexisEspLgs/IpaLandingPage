@@ -20,6 +20,7 @@ import {
   Mail,
   FootprintsIcon as FooterIcon,
   X,
+  ArrowLeft,
 } from "lucide-react"
 import { useAuth } from "@/contexts/AuthContext"
 import { useAppContext } from "@/contexts/AppContext"
@@ -223,7 +224,49 @@ export default function AdminLayout({
       {/* Main content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top navigation bar */}
-        
+        <div
+          className={`p-4 border-b ${theme === "dark" ? "border-gray-700 bg-gray-800" : "border-gray-200 bg-white"}`}
+        >
+          <div className="flex justify-between items-center">
+            <div className="flex items-center">
+              {pathname !== "/admin/dashboard" && (
+                <Link href="/admin/dashboard">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={`mr-2 ${theme === "dark" ? "text-gray-200 hover:bg-gray-700" : "text-gray-800 hover:bg-gray-200"}`}
+                  >
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    Volver al Dashboard
+                  </Button>
+                </Link>
+              )}
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className={`lg:hidden ${theme === "dark" ? "text-gray-200 hover:bg-gray-700" : "text-gray-800 hover:bg-gray-200"}`}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-6 w-6"
+              >
+                <line x1="3" y1="12" x2="21" y2="12" />
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <line x1="3" y1="18" x2="21" y2="18" />
+              </svg>
+            </Button>
+          </div>
+        </div>
 
         {/* Page content - eliminado el padding extra para usar todo el espacio */}
         <main

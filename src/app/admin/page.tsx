@@ -14,6 +14,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import Link from "next/link"
 import { loginUser } from "@/lib/firebase"
+import { ArrowLeft } from "lucide-react"
 
 export default function AdminPage() {
   const { user, loading } = useAuth()
@@ -144,6 +145,12 @@ export default function AdminPage() {
                     "Iniciar Sesión"
                   )}
                 </Button>
+                 <Link href="/" className="w-full">
+                              <Button variant="outline" className="w-full flex items-center justify-center mt-2">
+                                <ArrowLeft className="h-4 w-4 mr-2" />
+                                Volver al sitio principal
+                              </Button>
+                            </Link>
               </form>
             </CardContent>
             <CardFooter className="flex flex-col space-y-2 bg-gray-50 dark:bg-gray-800/50 p-6">

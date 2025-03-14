@@ -12,6 +12,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { motion } from "framer-motion"
 import Link from "next/link"
+import { ArrowLeft } from "lucide-react"
 
 export default function LoginForm() {
   const [email, setEmail] = useState("")
@@ -88,6 +89,12 @@ export default function LoginForm() {
                 ¿Olvidaste tu contraseña?
               </Link>
             </div>
+            <Link href="/" className="w-full">
+              <Button variant="outline" className="w-full flex items-center justify-center mt-2">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Volver al sitio principal
+              </Button>
+            </Link>
           </CardFooter>
         </Card>
       </motion.div>
