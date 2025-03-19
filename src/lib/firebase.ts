@@ -15,6 +15,9 @@ const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0
 const auth = getAuth(app)
 const db = getFirestore(app)
 
+// Configurar el idioma de los correos electrónicos de Firebase
+auth.languageCode = "es"
+
 export { auth, db }
 
 export const loginUser = async (email: string, password: string) => {
@@ -44,11 +47,65 @@ export const logoutUser = async () => {
 
 export const resetPassword = async (email: string) => {
   try {
+    // Validación básica del email
+    if (!email || email.trim() === "") {
+      return {
+        success: false,
+        message: "Por favor, ingresa un correo electrónico válido.",
+      }
+    }
+
+    // Validación de formato de email con regex
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) {
+      return {
+        success: false,
+        message: "El formato del correo electrónico no es válido.",
+      }
+    }
+
+    // Enviar el correo de recuperación
     await sendPasswordResetEmail(auth, email)
-    return { success: true, message: "Se ha enviado un correo de recuperación de contraseña." }
-  } catch (error) {
+
+    console.log("Correo de recuperación enviado con éxito a:", email)
+
+    return {
+      success: true,
+      message:
+        "Se ha enviado un correo de recuperación de contraseña. Por favor, revisa tu bandeja de entrada y sigue las instrucciones.",
+    }
+  } catch (error: unknown) {
     console.error("Error al enviar el correo de recuperación:", error)
-    return { success: false, message: "Error al enviar el correo de recuperación." }
+
+    const FirebaseError = error as { code: string }
+
+    // Proporcionar mensajes de error más específicos
+    if (FirebaseError.code === "auth/user-not-found") {
+      return {
+        success: false,
+        message: "No existe una cuenta con este correo electrónico. Por favor, verifica que el correo sea correcto.",
+      }
+    } else if (FirebaseError.code === "auth/invalid-email") {
+      return {
+        success: false,
+        message: "El formato del correo electrónico no es válido. Por favor, ingresa un correo electrónico válido.",
+      }
+    } else if (FirebaseError.code === "auth/too-many-requests") {
+      return {
+        success: false,
+        message: "Has realizado demasiadas solicitudes. Por favor, intenta de nuevo más tarde.",
+      }
+    } else if (FirebaseError.code === "auth/network-request-failed") {
+      return {
+        success: false,
+        message: "Error de conexión. Por favor, verifica tu conexión a internet e intenta de nuevo.",
+      }
+    }
+
+    return {
+      success: false,
+      message: "Error al enviar el correo de recuperación. Por favor, intenta de nuevo más tarde.",
+    }
   }
 }
 

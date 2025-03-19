@@ -1,23 +1,23 @@
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+import { NextResponse } from "next/server"
+import type { NextRequest } from "next/server"
 
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
 
-  // Protect all /admin routes except /admin (which is the login page)
-  if (pathname.startsWith('/admin') && pathname !== '/admin') {
-    // Check for the presence of a session token
-    const token = request.cookies.get('session')?.value
+  // Proteger todas las rutas bajo /admin (excepto /admin que es la página de login)
+  if (pathname.startsWith("/admin") && pathname !== "/admin") {
+    // Verificar la presencia de un token de sesión
+    const token = request.cookies.get("session")?.value
 
     if (!token) {
-      return NextResponse.redirect(new URL('/admin', request.url))
+      return NextResponse.redirect(new URL("/admin", request.url)) // Redirigir al login si no hay token
     }
   }
 
-  return NextResponse.next()
+  return NextResponse.next() // Continuar con la respuesta normal
 }
 
 export const config = {
-  matcher: ['/admin/:path*'],
+  matcher: ["/admin/:path*"], // Aplicar a todas las rutas bajo /admin
 }
 
