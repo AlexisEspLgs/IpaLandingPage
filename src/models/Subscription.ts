@@ -6,6 +6,10 @@ const SubscriptionSchema = new mongoose.Schema({
     required: [true, "Please provide an email address."],
     unique: true,
   },
+  active: {
+    type: Boolean,
+    default: true,
+  },
   createdAt: {
     type: Date,
     default: Date.now,

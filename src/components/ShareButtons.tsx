@@ -2,7 +2,7 @@ import { Facebook, Twitter, PhoneIcon as WhatsApp } from 'lucide-react'
 import { BlogPost } from '@/types/blog'
 
 export function ShareButtons({ post }: { post: BlogPost }) {
-  const shareUrl = `https://ipalasencinas.com/blog/${post.id}`
+  const shareUrl = `https://ipa-las-encinas.netlify.app/blog/${post.id}`
   const shareText = `Mira este artículo de IPA Las Encinas: ${post.title}`
 
   const shareLinks = [

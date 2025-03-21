@@ -21,6 +21,7 @@ import {
   FootprintsIcon as FooterIcon,
   X,
   ArrowLeft,
+  Star,
 } from "lucide-react"
 import { useAuth } from "@/contexts/AuthContext"
 import { useAppContext } from "@/contexts/AppContext"
@@ -115,6 +116,7 @@ export default function AdminLayout({
     { icon: FileText, label: "Blogs", href: "/admin/blog" },
     { icon: ImageIcon, label: "Carousel Imagenes", href: "/admin/carousel" },
     { icon: Bell, label: "News Popup", href: "/admin/news-popup" },
+    { icon: Star, label: "News-Letter", href: "/admin/newsletter" },
     { icon: Mail, label: "Suscripciones", href: "/admin/subscriptions" },
     { icon: FooterIcon, label: "Footer", href: "/admin/footer" },
     { icon: Settings, label: "Configuracion", href: "/admin/settings" },

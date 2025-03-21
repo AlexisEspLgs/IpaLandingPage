@@ -6,11 +6,51 @@ export async function POST(request: Request) {
   try {
     await connectToDatabase()
     const { email } = await request.json()
-    const subscription = await Subscription.create({ email })
-    return NextResponse.json(subscription)
+
+    // Verificar si el email ya existe
+    const existingSubscription = await Subscription.findOne({ email })
+
+    if (existingSubscription) {
+      // Si existe pero está inactivo, reactivarlo
+      if (!existingSubscription.active) {
+        existingSubscription.active = true
+        await existingSubscription.save()
+        return NextResponse.json({
+          success: true,
+          message: "Suscripción reactivada correctamente",
+        })
+      }
+
+      // Si ya está activo, informar que ya está suscrito
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Este email ya está suscrito",
+        },
+        { status: 400 },
+      )
+    }
+
+    // Crear nueva suscripción
+    const subscription = await Subscription.create({
+      email,
+      active: true,
+    })
+
+    return NextResponse.json({
+      success: true,
+      message: "Suscripción creada correctamente",
+      data: subscription,
+    })
   } catch (error) {
     console.error("Error creating subscription:", error)
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Error al crear la suscripción",
+      },
+      { status: 500 },
+    )
   }
 }
 
