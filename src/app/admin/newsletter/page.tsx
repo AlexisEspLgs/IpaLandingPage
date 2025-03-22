@@ -214,13 +214,6 @@ export default function NewsletterPage() {
     }
   }
 
-  const handleFileChange = (fieldName: string, e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      handleImageUpload(fieldName, file)
-    }
-  }
-
   const triggerFileInput = (fieldName: string) => {
     if (fileInputRef.current) {
       fileInputRef.current.setAttribute("data-field", fieldName)
