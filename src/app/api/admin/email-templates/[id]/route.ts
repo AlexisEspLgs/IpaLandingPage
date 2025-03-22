@@ -1,21 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
-import EmailTemplate, { IEmailTemplate } from "@/models/EmailTemplate";
+import EmailTemplate from "@/models/EmailTemplate";
 import mongoose from "mongoose";
-
-interface Params {
-  params: {
-    id: string;
-  };
-}
 
 // GET - Obtener una plantilla específica
 export async function GET(
   request: NextRequest,
-  { params }: Params
-): Promise<NextResponse<IEmailTemplate | { error: string }>> {
+  context: { params: { id: string } }
+): Promise<NextResponse> {
   try {
-    const { id } = params;
+    const { id } = context.params;
     
     if (!mongoose.isValidObjectId(id)) {
       return NextResponse.json({ error: "ID de plantilla inválido" }, { status: 400 });
@@ -41,10 +35,10 @@ export async function GET(
 // PUT - Actualizar una plantilla
 export async function PUT(
   request: NextRequest,
-  { params }: Params
-): Promise<NextResponse<IEmailTemplate | { error: string }>> {
+  context: { params: { id: string } }
+): Promise<NextResponse> {
   try {
-    const { id } = params;
+    const { id } = context.params;
     
     if (!mongoose.isValidObjectId(id)) {
       return NextResponse.json({ error: "ID de plantilla inválido" }, { status: 400 });
@@ -76,10 +70,10 @@ export async function PUT(
 // DELETE - Eliminar una plantilla
 export async function DELETE(
   request: NextRequest,
-  { params }: Params
-): Promise<NextResponse<{ success: boolean } | { error: string }>> {
+  context: { params: { id: string } }
+): Promise<NextResponse> {
   try {
-    const { id } = params;
+    const { id } = context.params;
 
     if (!mongoose.isValidObjectId(id)) {
       return NextResponse.json({ error: "ID de plantilla inválido" }, { status: 400 });
