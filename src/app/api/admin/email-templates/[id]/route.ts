@@ -3,7 +3,7 @@ import { connectToDatabase } from "@/lib/mongodb"
 import EmailTemplate from "@/models/EmailTemplate"
 
 // GET - Obtener una plantilla específica
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET({ params }: { params: { id: string } }) {
   try {
     const { id } = params
     await connectToDatabase()
@@ -47,7 +47,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 }
 
 // DELETE - Eliminar una plantilla
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE({ params }: { params: { id: string } }) {
   try {
     const { id } = params
     await connectToDatabase()
