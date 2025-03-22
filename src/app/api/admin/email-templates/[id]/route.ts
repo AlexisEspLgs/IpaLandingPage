@@ -3,9 +3,9 @@ import { connectToDatabase } from "@/lib/mongodb";
 import EmailTemplate from "@/models/EmailTemplate";
 
 // GET - Obtener una plantilla específica
-export async function GET({ params }: { params: { id: string } }) {
+export async function GET(request: Request, { params }: { params: { id: string } }) {
   try {
-    const { id } = params; // Se asume que params tiene la propiedad id de tipo string
+    const { id } = params;  // Se obtiene el id de los params
     await connectToDatabase();
 
     const template = await EmailTemplate.findById(id);
@@ -24,8 +24,8 @@ export async function GET({ params }: { params: { id: string } }) {
 // PUT - Actualizar una plantilla
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
   try {
-    const { id } = params; // Se asume que params tiene la propiedad id de tipo string
-    const data = await request.json();
+    const { id } = params;  // Se obtiene el id de los params
+    const data = await request.json();  // Obtener el cuerpo de la solicitud
     await connectToDatabase();
 
     const updatedTemplate = await EmailTemplate.findByIdAndUpdate(
@@ -46,9 +46,9 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 }
 
 // DELETE - Eliminar una plantilla
-export async function DELETE({ params }: { params: { id: string } }) {
+export async function DELETE(request: Request, { params }: { params: { id: string } }) {
   try {
-    const { id } = params; // Se asume que params tiene la propiedad id de tipo string
+    const { id } = params;  // Se obtiene el id de los params
     await connectToDatabase();
 
     const deletedTemplate = await EmailTemplate.findByIdAndDelete(id);
