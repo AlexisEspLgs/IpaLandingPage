@@ -6,6 +6,7 @@ import EmailTemplate from "@/models/EmailTemplate";
 export async function GET(request: Request, { params }: { params: { id: string } }) {
   try {
     const { id } = params;  // Se obtiene el id de los params
+    const data = await request.json(); 
     await connectToDatabase();
 
     const template = await EmailTemplate.findById(id);
