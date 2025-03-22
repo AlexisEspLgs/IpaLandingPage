@@ -47,7 +47,7 @@ const EmailTemplateSchema = new Schema(
     },
     previewImage: {
       type: String,
-      default: "/placeholder.svg?height=300&width=400",
+      default: "",
     },
     editableFields: [EditableFieldSchema],
     createdAt: {

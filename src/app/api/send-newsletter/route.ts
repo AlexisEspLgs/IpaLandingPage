@@ -1,66 +1,85 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { connectToDatabase } from "@/lib/mongodb"
 import Subscription from "@/models/Subscription"
-import { sendEmailWithNodemailer } from "@/lib/nodemailer"
-import { applyTemplateValues } from "@/lib/email-templates"
 import EmailTemplate from "@/models/EmailTemplate"
+import { applyTemplateValues } from "@/lib/email-templates"
+import { sendNewsletterWithNodemailer } from "@/lib/nodemailer"
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
-    const { subject, html, templateId, templateValues } = body
+    const { subject, html, templateId, templateValues } = await request.json()
 
+    // Validar que se proporcione el contenido necesario
     if (!subject) {
-      return NextResponse.json({ error: "El asunto es requerido" }, { status: 400 })
+      return NextResponse.json({ error: "El asunto es obligatorio" }, { status: 400 })
     }
 
-    // Obtener todos los suscriptores
-    await connectToDatabase()
-    const subscriptions = await Subscription.find({})
+    if (!html && !templateId) {
+      return NextResponse.json(
+        { error: "Debe proporcionar el contenido HTML o seleccionar una plantilla" },
+        { status: 400 },
+      )
+    }
 
-    if (subscriptions.length === 0) {
+    // Conectar a la base de datos
+    await connectToDatabase()
+
+    // Obtener todos los suscriptores (sin filtrar por active)
+    const subscribers = await Subscription.find({})
+
+    if (subscribers.length === 0) {
       return NextResponse.json({ error: "No hay suscriptores para enviar el newsletter" }, { status: 400 })
     }
 
-    // Determinar el contenido HTML a enviar
+    // Preparar el contenido HTML
     let htmlContent = html
 
-    // Si se proporciona un ID de plantilla, obtener la plantilla y aplicar los valores
+    // Si se está usando una plantilla, obtenerla y aplicar los valores
     if (templateId) {
-      // Obtener la plantilla directamente desde MongoDB
       const template = await EmailTemplate.findById(templateId)
-
       if (!template) {
         return NextResponse.json({ error: "Plantilla no encontrada" }, { status: 404 })
       }
 
+      // Convertir valores booleanos de string a boolean
+      const processedValues: Record<string, string | boolean> = {}
+      Object.entries(templateValues).forEach(([key, value]) => {
+        if (key.startsWith("show") && (value === "true" || value === "false")) {
+          processedValues[key] = value === "true"
+        } else {
+          processedValues[key] = value as string | boolean
+        }
+      })
+
       // Aplicar los valores a la plantilla
-      if (templateValues && Object.keys(templateValues).length > 0) {
-        htmlContent = applyTemplateValues(template.htmlContent, templateValues)
-      } else {
-        htmlContent = template.htmlContent
-      }
+      const stringValues: Record<string, string> = {}
+      Object.entries(processedValues).forEach(([key, value]) => {
+        stringValues[key] = value.toString()
+      })
+      htmlContent = applyTemplateValues(template.htmlContent, stringValues)
     }
 
-    if (!htmlContent) {
-      return NextResponse.json({ error: "El contenido HTML es requerido" }, { status: 400 })
+    // Obtener los emails de los suscriptores
+    const emails = subscribers.map((sub) => sub.email)
+
+    // Enviar el newsletter
+    const result = await sendNewsletterWithNodemailer(emails, subject, htmlContent)
+
+    if (!result.success) {
+      throw new Error("Error al enviar el newsletter")
     }
 
-    // Enviar email a cada suscriptor
-    const emailPromises = subscriptions.map(async (subscription) => {
-      return sendEmailWithNodemailer(subscription.email, subject, htmlContent)
-    })
-
-    await Promise.all(emailPromises)
 
     return NextResponse.json({
       success: true,
-      message: `Newsletter enviado exitosamente a ${subscriptions.length} suscriptores`,
-      count: subscriptions.length,
+      message: `Newsletter enviado a ${emails.length} suscriptores`,
     })
   } catch (error) {
     console.error("Error al enviar newsletter:", error)
-    return NextResponse.json({ error: "Error al enviar newsletter" }, { status: 500 })
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Error al enviar newsletter" },
+      { status: 500 },
+    )
   }
 }
 

@@ -152,7 +152,7 @@ export const defaultTemplates: EmailTemplateData[] = [
         name: "buttonUrl",
         type: "text",
         label: "URL del Botón",
-        defaultValue: "",
+        defaultValue: "https://ipa-las-encinas.netlify.app/",
         placeholder: "URL a la que dirigirá el botón",
       },
       {

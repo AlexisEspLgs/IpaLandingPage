@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -10,8 +10,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
-import { AlertCircle, CheckCircle2, Send, RefreshCw, Users, Mail } from "lucide-react"
+import { AlertCircle, CheckCircle2, Send, RefreshCw, Users, Mail, Upload, X } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Switch } from "@/components/ui/switch"
+import { uploadImage } from "@/lib/uploadImage"
 
 interface EmailTemplate {
   _id: string
@@ -25,6 +27,7 @@ interface EmailTemplate {
     label: string
     defaultValue: string
     placeholder?: string
+    group?: string
   }[]
 }
 
@@ -51,6 +54,9 @@ export default function NewsletterPage() {
   const [activeTab, setActiveTab] = useState("custom")
   const [subscribers, setSubscribers] = useState<Subscriber[]>([])
   const [loadingSubscribers, setLoadingSubscribers] = useState(false)
+  const [uploading, setUploading] = useState<Record<string, boolean>>({})
+  const [imagePreview, setImagePreview] = useState<Record<string, string>>({})
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Memoizar la función generatePreview para evitar recreaciones innecesarias
   const generatePreview = useCallback(async () => {
@@ -138,15 +144,23 @@ export default function NewsletterPage() {
   useEffect(() => {
     if (selectedTemplate) {
       const initialValues: Record<string, string> = {}
+      const initialPreviews: Record<string, string> = {}
+
       selectedTemplate.editableFields.forEach((field) => {
         // Si el campo es de tipo imagen, usar el logo por defecto
         if (field.type === "image" && (!field.defaultValue || field.defaultValue === "")) {
           initialValues[field.name] = DEFAULT_LOGO
+          initialPreviews[field.name] = DEFAULT_LOGO
         } else {
           initialValues[field.name] = field.defaultValue
+          if (field.type === "image") {
+            initialPreviews[field.name] = field.defaultValue
+          }
         }
       })
+
       setTemplateValues(initialValues)
+      setImagePreview(initialPreviews)
     }
   }, [selectedTemplate])
 
@@ -166,6 +180,74 @@ export default function NewsletterPage() {
     setTemplateValues((prev) => ({
       ...prev,
       [fieldName]: value,
+    }))
+  }
+
+  const handleSwitchChange = (fieldName: string, checked: boolean) => {
+    setTemplateValues((prev) => ({
+      ...prev,
+      [fieldName]: checked.toString(),
+    }))
+  }
+
+  const handleImageUpload = async (fieldName: string, file: File) => {
+    if (!file) return
+
+    try {
+      setUploading((prev) => ({ ...prev, [fieldName]: true }))
+
+      // Crear una URL temporal para la vista previa
+      const previewUrl = URL.createObjectURL(file)
+      setImagePreview((prev) => ({ ...prev, [fieldName]: previewUrl }))
+
+      // Subir la imagen a Cloudinary
+      const imageUrl = await uploadImage(file)
+
+      // Actualizar el valor del campo con la URL de Cloudinary
+      handleTemplateValueChange(fieldName, imageUrl)
+
+      setUploading((prev) => ({ ...prev, [fieldName]: false }))
+    } catch (error) {
+      console.error("Error al subir imagen:", error)
+      setError("Error al subir la imagen. Inténtalo de nuevo.")
+      setUploading((prev) => ({ ...prev, [fieldName]: false }))
+    }
+  }
+
+  const handleFileChange = (fieldName: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      handleImageUpload(fieldName, file)
+    }
+  }
+
+  const triggerFileInput = (fieldName: string) => {
+    if (fileInputRef.current) {
+      fileInputRef.current.setAttribute("data-field", fieldName)
+      fileInputRef.current.click()
+    }
+  }
+
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const fieldName = fileInputRef.current?.getAttribute("data-field") || ""
+    const file = e.target.files?.[0]
+    if (file && fieldName) {
+      handleImageUpload(fieldName, file)
+    }
+    // Limpiar el input para permitir seleccionar el mismo archivo nuevamente
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""
+    }
+  }
+
+  const removeImage = (fieldName: string) => {
+    setTemplateValues((prev) => ({
+      ...prev,
+      [fieldName]: "",
+    }))
+    setImagePreview((prev) => ({
+      ...prev,
+      [fieldName]: "",
     }))
   }
 
@@ -253,19 +335,77 @@ export default function NewsletterPage() {
             </div>
           </div>
         )
+      case "boolean":
+        return (
+          <div className="flex items-center justify-between space-y-0 pt-2" key={field.name}>
+            <Label htmlFor={field.name}>{field.label}</Label>
+            <Switch
+              id={field.name}
+              checked={templateValues[field.name] === "true"}
+              onCheckedChange={(checked) => handleSwitchChange(field.name, checked)}
+            />
+          </div>
+        )
       case "image":
         return (
           <div className="space-y-2" key={field.name}>
             <Label htmlFor={field.name}>{field.label}</Label>
-            <div className="flex gap-2 mt-1">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => handleTemplateValueChange(field.name, "/logo-blanco-1024x364.png")}
-              >
-                Logo Blanco
-              </Button>
+            <div className="flex flex-col gap-2">
+              {imagePreview[field.name] && (
+                <div className="relative w-full h-40 bg-gray-100 rounded-md overflow-hidden">
+                  <img
+                    src={imagePreview[field.name] || ""}
+                    alt={field.label}
+                    className="w-full h-full object-contain"
+                  />
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="icon"
+                    className="absolute top-2 right-2 h-8 w-8"
+                    onClick={() => removeImage(field.name)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => triggerFileInput(field.name)}
+                  disabled={uploading[field.name]}
+                >
+                  {uploading[field.name] ? (
+                    <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <Upload className="h-4 w-4 mr-2" />
+                  )}
+                  {uploading[field.name] ? "Subiendo..." : "Subir imagen"}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => handleTemplateValueChange(field.name, "/logo.jpg")}
+                >
+                  Logo
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => handleTemplateValueChange(field.name, "/logo-blanco-1024x364.png")}
+                >
+                  Logo Blanco
+                </Button>
+              </div>
+              <Input
+                type="text"
+                value={templateValues[field.name] || ""}
+                onChange={(e) => handleTemplateValueChange(field.name, e.target.value)}
+                placeholder="URL de la imagen"
+                className="mt-2"
+              />
             </div>
           </div>
         )
@@ -284,6 +424,32 @@ export default function NewsletterPage() {
         )
     }
   }
+
+  // Agrupar campos por grupo
+  const getGroupedFields = () => {
+    if (!selectedTemplate) return {}
+
+    const grouped: Record<string, typeof selectedTemplate.editableFields> = {}
+
+    // Primero agrupar los campos
+    selectedTemplate.editableFields.forEach((field) => {
+      const group = field.group || "General"
+      if (!grouped[group]) {
+        grouped[group] = []
+      }
+      grouped[group].push(field)
+    })
+
+    return grouped
+  }
+
+  const groupedFields = getGroupedFields()
+  const groups = Object.keys(groupedFields).sort((a, b) => {
+    // Poner "Imágenes" primero
+    if (a === "Imágenes" || a === "Imagen") return -1
+    if (b === "Imágenes" || b === "Imagen") return 1
+    return a.localeCompare(b)
+  })
 
   return (
     <div className="container mx-auto py-6">
@@ -368,8 +534,15 @@ export default function NewsletterPage() {
                           <CardDescription>{selectedTemplate.description}</CardDescription>
                         </CardHeader>
                         <CardContent>
-                          <div className="space-y-4">
-                            {selectedTemplate.editableFields.map((field) => renderField(field))}
+                          <div className="space-y-6">
+                            {groups.map((group) => (
+                              <div key={group} className="space-y-4">
+                                <h3 className="font-medium text-lg">{group}</h3>
+                                <div className="space-y-4 pl-1">
+                                  {groupedFields[group].map((field) => renderField(field))}
+                                </div>
+                              </div>
+                            ))}
                           </div>
                         </CardContent>
                       </Card>
@@ -401,8 +574,17 @@ export default function NewsletterPage() {
                   disabled={sending || subscribers.length === 0}
                   className="flex items-center gap-2"
                 >
-                  {sending ? "Enviando..." : "Enviar Newsletter"}
-                  <Send className="h-4 w-4" />
+                  {sending ? (
+                    <>
+                      <RefreshCw className="h-4 w-4 animate-spin" />
+                      Enviando...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="h-4 w-4" />
+                      Enviar Newsletter
+                    </>
+                  )}
                 </Button>
                 {subscribers.length === 0 && (
                   <p className="text-red-500 text-sm mt-2">
@@ -465,6 +647,9 @@ export default function NewsletterPage() {
           </Card>
         </div>
       </div>
+
+      {/* Input de archivo oculto para subir imágenes */}
+      <input type="file" ref={fileInputRef} onChange={handleFileInputChange} accept="image/*" className="hidden" />
     </div>
   )
 }

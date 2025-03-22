@@ -71,7 +71,7 @@ const defaultTemplates = [
       </body>
       </html>
     `,
-    previewImage: "/placeholder.svg?height=200&width=300",
+    previewImage: "",
     editableFields: [
       {
         name: "title",
@@ -231,7 +231,7 @@ const defaultTemplates = [
       </body>
       </html>
     `,
-    previewImage: "/placeholder.svg?height=200&width=300",
+    previewImage: "",
     editableFields: [
       {
         name: "eventName",
@@ -251,7 +251,7 @@ const defaultTemplates = [
         name: "eventImageUrl",
         type: "image",
         label: "Imagen del Evento",
-        defaultValue: "/placeholder.svg?height=300&width=600",
+        defaultValue: "",
         placeholder: "URL de la imagen del evento",
       },
       {
@@ -432,7 +432,7 @@ const defaultTemplates = [
       </body>
       </html>
     `,
-    previewImage: "/placeholder.svg?height=200&width=300",
+    previewImage: "",
     editableFields: [
       {
         name: "promoTitle",
@@ -452,7 +452,7 @@ const defaultTemplates = [
         name: "bannerUrl",
         type: "image",
         label: "Imagen de Banner",
-        defaultValue: "/placeholder.svg?height=300&width=600",
+        defaultValue: "",
         placeholder: "URL de la imagen del banner",
       },
       {

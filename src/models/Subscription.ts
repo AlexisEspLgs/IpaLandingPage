@@ -1,20 +1,36 @@
-import mongoose from "mongoose"
+import mongoose, { Schema, type Document } from "mongoose"
 
-const SubscriptionSchema = new mongoose.Schema({
-  email: {
-    type: String,
-    required: [true, "Please provide an email address."],
-    unique: true,
-  },
-  active: {
-    type: Boolean,
-    default: true,
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-})
+export interface ISubscription extends Document {
+  email: string
+  name?: string
+  active: boolean
+  createdAt: Date
+  updatedAt: Date
+}
 
-export default mongoose.models.Subscription || mongoose.model("Subscription", SubscriptionSchema)
+const SubscriptionSchema = new Schema<ISubscription>(
+  {
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+      lowercase: true,
+    },
+    name: {
+      type: String,
+      trim: true,
+    },
+    active: {
+      type: Boolean,
+      default: true,
+    },
+  },
+  { timestamps: true },
+)
+
+// Verificar si el modelo ya existe para evitar sobreescribirlo
+const Subscription = mongoose.models.Subscription || mongoose.model<ISubscription>("Subscription", SubscriptionSchema)
+
+export default Subscription
 
