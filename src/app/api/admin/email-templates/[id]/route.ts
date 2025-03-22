@@ -1,33 +1,65 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import EmailTemplate from "@/models/EmailTemplate";
+import { isValidObjectId } from "mongoose";
+
+// Tipo para la respuesta de error
+type ErrorResponse = {
+  error: string;
+};
 
 // GET - Obtener una plantilla específica
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
-    const { id } = params;  // Se obtiene el id de los params
-    const data = await request.json(); 
-    console.log(data);
-    await connectToDatabase();
+    const { id } = params;
+    
+    // Validar el ID antes de hacer la consulta
+    if (!isValidObjectId(id)) {
+      return NextResponse.json<ErrorResponse>(
+        { error: "ID de plantilla inválido" },
+        { status: 400 }
+      );
+    }
 
+    await connectToDatabase();
     const template = await EmailTemplate.findById(id);
 
     if (!template) {
-      return NextResponse.json({ error: "Plantilla no encontrada" }, { status: 404 });
+      return NextResponse.json<ErrorResponse>(
+        { error: "Plantilla no encontrada" },
+        { status: 404 }
+      );
     }
 
     return NextResponse.json(template);
   } catch (error) {
     console.error("Error al obtener plantilla de email:", error);
-    return NextResponse.json({ error: "Error al obtener plantilla de email" }, { status: 500 });
+    return NextResponse.json<ErrorResponse>(
+      { error: "Error al obtener plantilla de email" },
+      { status: 500 }
+    );
   }
 }
 
 // PUT - Actualizar una plantilla
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
-    const { id } = params;  // Se obtiene el id de los params
-    const data = await request.json();  // Obtener el cuerpo de la solicitud
+    const { id } = params;
+    
+    if (!isValidObjectId(id)) {
+      return NextResponse.json<ErrorResponse>(
+        { error: "ID de plantilla inválido" },
+        { status: 400 }
+      );
+    }
+
+    const data = await request.json();
     await connectToDatabase();
 
     const updatedTemplate = await EmailTemplate.findByIdAndUpdate(
@@ -37,31 +69,53 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     );
 
     if (!updatedTemplate) {
-      return NextResponse.json({ error: "Plantilla no encontrada" }, { status: 404 });
+      return NextResponse.json<ErrorResponse>(
+        { error: "Plantilla no encontrada" },
+        { status: 404 }
+      );
     }
 
     return NextResponse.json(updatedTemplate);
   } catch (error) {
     console.error("Error al actualizar plantilla de email:", error);
-    return NextResponse.json({ error: "Error al actualizar plantilla de email" }, { status: 500 });
+    return NextResponse.json<ErrorResponse>(
+      { error: "Error al actualizar plantilla de email" },
+      { status: 500 }
+    );
   }
 }
 
 // DELETE - Eliminar una plantilla
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
-    const { id } = params;  // Se obtiene el id de los params
-    await connectToDatabase();
+    const { id } = params;
 
+    if (!isValidObjectId(id)) {
+      return NextResponse.json<ErrorResponse>(
+        { error: "ID de plantilla inválido" },
+        { status: 400 }
+      );
+    }
+
+    await connectToDatabase();
     const deletedTemplate = await EmailTemplate.findByIdAndDelete(id);
 
     if (!deletedTemplate) {
-      return NextResponse.json({ error: "Plantilla no encontrada" }, { status: 404 });
+      return NextResponse.json<ErrorResponse>(
+        { error: "Plantilla no encontrada" },
+        { status: 404 }
+      );
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error al eliminar plantilla de email:", error);
-    return NextResponse.json({ error: "Error al eliminar plantilla de email" }, { status: 500 });
+    return NextResponse.json<ErrorResponse>(
+      { error: "Error al eliminar plantilla de email" },
+      { status: 500 }
+    );
   }
 }
