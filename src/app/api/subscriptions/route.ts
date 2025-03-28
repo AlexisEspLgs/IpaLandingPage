@@ -1,63 +1,100 @@
-import { NextResponse } from "next/server"
+import { type NextRequest, NextResponse } from "next/server"
 import { connectToDatabase } from "@/lib/mongodb"
 import Subscription from "@/models/Subscription"
+import { logActivity } from "@/lib/activity-logger"
+import { sendWelcomeEmail } from "@/lib/nodemailer"
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     await connectToDatabase()
-    const { email } = await request.json()
 
-    // Verificar si el email ya existe
+    const { email, name } = await request.json()
+
+    if (!email) {
+      return NextResponse.json({ success: false, message: "El email es requerido" }, { status: 400 })
+    }
+
+    // Verificar si el email ya existe pero está inactivo
     const existingSubscription = await Subscription.findOne({ email })
 
     if (existingSubscription) {
-      // Si existe pero está inactivo, reactivarlo
-      if (!existingSubscription.active) {
-        existingSubscription.active = true
-        await existingSubscription.save()
+      if (existingSubscription.active) {
+        return NextResponse.json({ success: false, message: "Este email ya está suscrito" }, { status: 400 })
+      } else {
+        // Reactivar la suscripción inactiva
+        await Subscription.updateOne({ email }, { $set: { active: true, name: name || existingSubscription.name } })
+
+        // Registrar la actividad
+        await logActivity({
+          action: "subscription_reactivated",
+          details: `Suscripción reactivada: ${email}`,
+          userId: "system",
+          userEmail: email,
+        })
+
+        // Enviar correo de bienvenida
+        sendWelcomeEmail({ email, name: name || existingSubscription.name }).catch((error) => {
+          console.error("Error al enviar email de bienvenida:", error)
+        })
+
         return NextResponse.json({
           success: true,
-          message: "Suscripción reactivada correctamente",
+          message: "Tu suscripción ha sido reactivada exitosamente",
         })
       }
-
-      // Si ya está activo, informar que ya está suscrito
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Este email ya está suscrito",
-        },
-        { status: 400 },
-      )
     }
 
     // Crear nueva suscripción
-    const subscription = await Subscription.create({
+    const newSubscription = new Subscription({
       email,
+      name,
       active: true,
+    })
+
+    await newSubscription.save()
+
+    // Registrar la actividad
+    await logActivity({
+      action: "new_subscription",
+      details: `Nueva suscripción: ${email}`,
+      userId: "system",
+      userEmail: email,
+    })
+
+    // Enviar correo de bienvenida
+    sendWelcomeEmail({ email, name }).catch((error) => {
+      console.error("Error al enviar email de bienvenida:", error)
     })
 
     return NextResponse.json({
       success: true,
-      message: "Suscripción creada correctamente",
-      data: subscription,
+      message: "Te has suscrito exitosamente",
+      subscription: newSubscription,
     })
   } catch (error) {
-    console.error("Error creating subscription:", error)
-    return NextResponse.json(
-      {
-        success: false,
-        error: "Error al crear la suscripción",
-      },
-      { status: 500 },
-    )
+    console.error("Error al procesar suscripción:", error)
+    return NextResponse.json({ success: false, message: "Error al procesar la solicitud" }, { status: 500 })
   }
 }
 
-export async function GET() {
+// Modificar la función GET para soportar el filtrado por estado activo
+export async function GET(request: Request) {
   try {
     await connectToDatabase()
-    const subscriptions = await Subscription.find({}).sort({ createdAt: -1 })
+
+    // Obtener parámetros de consulta
+    const { searchParams } = new URL(request.url)
+    const activeParam = searchParams.get("active")
+
+    // Construir el filtro basado en los parámetros
+    const filter: { active?: boolean } = {}
+    if (activeParam === "true") {
+      filter.active = true
+    } else if (activeParam === "false") {
+      filter.active = false
+    }
+
+    const subscriptions = await Subscription.find(filter).sort({ createdAt: -1 })
     return NextResponse.json(subscriptions)
   } catch (error) {
     console.error("Error fetching subscriptions:", error)

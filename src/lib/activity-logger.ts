@@ -16,6 +16,8 @@ export type ActivityAction =
   | "new_subscription"
   | "send_newsletter"
   | "backup_system"
+  | "subscription_reactivated"
+  | "newsletter_sent"
 
 export interface LogActivityParams {
   userId: string
@@ -102,6 +104,8 @@ export function getActionMessage(action: ActivityAction): string {
     new_subscription: "registró una nueva suscripción",
     send_newsletter: "envió un newsletter",
     backup_system: "realizó una copia de seguridad",
+    subscription_reactivated: "reactivó una suscripción",
+    newsletter_sent: "envió un newsletter"
   }
 
   return actionMessages[action] || "realizó una acción"

@@ -7,6 +7,7 @@ interface EditableField {
   label: string
   defaultValue: string
   placeholder?: string
+  group?: string
 }
 
 // Interfaz para el documento de plantilla de email
@@ -16,6 +17,7 @@ export interface IEmailTemplate extends Document {
   htmlContent: string
   previewImage: string
   editableFields: EditableField[]
+  type: "newsletter" | "welcome" | "notification" | "other"
   createdAt: Date
   updatedAt: Date
 }
@@ -27,6 +29,7 @@ const EditableFieldSchema = new Schema({
   label: { type: String, required: true },
   defaultValue: { type: String, required: true },
   placeholder: { type: String },
+  group: { type: String },
 })
 
 // Esquema principal para la plantilla de email
@@ -50,13 +53,10 @@ const EmailTemplateSchema = new Schema(
       default: "",
     },
     editableFields: [EditableFieldSchema],
-    createdAt: {
-      type: Date,
-      default: Date.now,
-    },
-    updatedAt: {
-      type: Date,
-      default: Date.now,
+    type: {
+      type: String,
+      enum: ["newsletter", "welcome", "notification", "other"],
+      default: "newsletter",
     },
   },
   {

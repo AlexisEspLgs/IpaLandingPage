@@ -1,10 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Send } from "lucide-react"
-import emailjs from "emailjs-com"
+import emailjs from "@emailjs/browser"
 import { useAppContext } from "@/contexts/AppContext"
-import type React from "react" // Added import for React
+import type React from "react"
 
 export function ContactForm() {
   const [name, setName] = useState("")
@@ -12,31 +12,68 @@ export function ContactForm() {
   const [message, setMessage] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitMessage, setSubmitMessage] = useState("")
+  const [submitStatus, setSubmitStatus] = useState<"success" | "error" | null>(null)
   const { theme } = useAppContext()
+
+  // Inicializar EmailJS una vez al cargar el componente
+  useEffect(() => {
+    // Inicializar EmailJS con tu clave pública
+    if (process.env.NEXT_PUBLIC_EMAILJS_USER_ID) {
+      emailjs.init(process.env.NEXT_PUBLIC_EMAILJS_USER_ID)
+    }
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    // Validación básica
+    if (!name.trim() || !email.trim() || !message.trim()) {
+      setSubmitStatus("error")
+      setSubmitMessage("Por favor, completa todos los campos.")
+      return
+    }
+
     setIsSubmitting(true)
     setSubmitMessage("")
+    setSubmitStatus(null)
 
     try {
-      await emailjs.send(
-        process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID!,
-        process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID!,
-        {
-          from_name: name,
-          from_email: email,
-          message: message,
-        },
-        process.env.NEXT_PUBLIC_EMAILJS_USER_ID!,
+      // Verificar que las variables de entorno estén definidas
+      if (
+        !process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID ||
+        !process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID ||
+        !process.env.NEXT_PUBLIC_EMAILJS_USER_ID
+      ) {
+        throw new Error("Faltan configuraciones de EmailJS")
+      }
+
+      // Crear el objeto de plantilla con los datos del formulario
+      const templateParams = {
+        from_name: name,
+        from_email: email,
+        message: message,
+        to_name: "Administrador IPA Las Encinas",
+        reply_to: email,
+      }
+
+      // Enviar el email usando la versión más reciente de la API
+      const response = await emailjs.send(
+        process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID,
+        process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID,
+        templateParams,
       )
 
-      setSubmitMessage("¡Mensaje enviado! Gracias por contactarnos.")
+      console.log("Email enviado con éxito:", response)
+
+      // Limpiar el formulario después de enviar
       setName("")
       setEmail("")
       setMessage("")
+      setSubmitStatus("success")
+      setSubmitMessage("¡Mensaje enviado! Gracias por contactarnos.")
     } catch (error) {
-      console.error("Error sending email:", error)
+      console.error("Error al enviar email:", error)
+      setSubmitStatus("error")
       setSubmitMessage("Hubo un error al enviar el mensaje. Por favor, intenta de nuevo.")
     } finally {
       setIsSubmitting(false)
@@ -131,7 +168,17 @@ export function ContactForm() {
               {isSubmitting ? "Enviando..." : "Enviar Mensaje"}
             </button>
             {submitMessage && (
-              <p className={`mt-4 text-center ${theme === "dark" ? "text-green-300" : "text-green-600"}`}>
+              <p
+                className={`mt-4 text-center ${
+                  submitStatus === "success"
+                    ? theme === "dark"
+                      ? "text-green-300"
+                      : "text-green-600"
+                    : theme === "dark"
+                      ? "text-red-300"
+                      : "text-red-600"
+                }`}
+              >
                 {submitMessage}
               </p>
             )}

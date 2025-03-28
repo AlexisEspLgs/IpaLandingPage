@@ -14,6 +14,7 @@ import { AlertCircle, CheckCircle2, Send, RefreshCw, Users, Mail, Upload, X } fr
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Switch } from "@/components/ui/switch"
 import { uploadImage } from "@/lib/uploadImage"
+import Image from "next/image"
 
 interface EmailTemplate {
   _id: string
@@ -105,7 +106,7 @@ export default function NewsletterPage() {
   const fetchSubscribers = async () => {
     setLoadingSubscribers(true)
     try {
-      const response = await fetch("/api/subscriptions")
+      const response = await fetch("/api/subscriptions?active=true")
       if (response.ok) {
         const data = await response.json()
         setSubscribers(data)
@@ -346,10 +347,12 @@ export default function NewsletterPage() {
             <div className="flex flex-col gap-2">
               {imagePreview[field.name] && (
                 <div className="relative w-full h-40 bg-gray-100 rounded-md overflow-hidden">
-                  <img
+                  <Image
                     src={imagePreview[field.name] || ""}
                     alt={field.label}
                     className="w-full h-full object-contain"
+                    width={400}
+                    height={400}
                   />
                   <Button
                     type="button"
@@ -608,14 +611,14 @@ export default function NewsletterPage() {
                   <span className="sr-only">Actualizar</span>
                 </Button>
               </div>
-              <CardDescription>{subscribers.length} suscriptores activos</CardDescription>
+              <CardDescription>{subscribers && subscribers.length} suscriptores activos</CardDescription>
             </CardHeader>
             <CardContent className="max-h-[400px] overflow-y-auto">
               {loadingSubscribers ? (
                 <div className="flex justify-center py-8">
                   <RefreshCw className="h-6 w-6 animate-spin text-muted-foreground" />
                 </div>
-              ) : subscribers.length > 0 ? (
+              ) : subscribers && subscribers.length > 0 ? (
                 <ul className="space-y-2">
                   {subscribers.map((subscriber) => (
                     <li key={subscriber._id} className="flex items-center gap-2 p-2 rounded-md hover:bg-muted">
@@ -627,7 +630,7 @@ export default function NewsletterPage() {
               ) : (
                 <div className="text-center py-8 text-muted-foreground">
                   <Mail className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                  <p>No hay suscriptores</p>
+                  <p>No hay suscriptores activos</p>
                 </div>
               )}
             </CardContent>
