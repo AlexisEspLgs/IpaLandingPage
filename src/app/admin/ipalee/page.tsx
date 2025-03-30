@@ -30,6 +30,7 @@ interface IpaleeImage {
   id: string
   url: string
   order: number
+  _id?: string
 }
 
 export default function AdminIpaleePage() {
@@ -37,9 +38,11 @@ export default function AdminIpaleePage() {
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [deletingImageId, setDeletingImageId] = useState<string | null>(null)
   const [message, setMessage] = useState("")
   const [messageType, setMessageType] = useState<"success" | "error">("success")
-  const {  } = useAppContext()
+  const {} = useAppContext()
   const router = useRouter()
 
   // Animaciones
@@ -65,10 +68,15 @@ export default function AdminIpaleePage() {
   const fetchImages = async () => {
     setIsLoading(true)
     try {
-      const response = await fetch("/api/admin/ipalee-config")
+      const response = await fetch("/api/admin/ipalee-config", {
+        cache: "no-store",
+        headers: {
+          "Cache-Control": "no-cache",
+        },
+      })
       if (response.ok) {
         const data = await response.json()
-        setImages(data.images || [])
+        setImages(data.config?.images || [])
       } else {
         throw new Error("Error al cargar las imágenes")
       }
@@ -108,11 +116,65 @@ export default function AdminIpaleePage() {
     }
   }
 
-  const handleDeleteImage = (id: string) => {
-    setImages(images.filter((image) => image.id !== id))
-    setMessageType("success")
-    setMessage("Imagen eliminada correctamente")
-    setTimeout(() => setMessage(""), 3000)
+  // Función para ejecutar la eliminación
+  const handleDeleteImage = async (image: IpaleeImage) => {
+    try {
+
+      setIsDeleting(true)
+      setDeletingImageId(image.id)
+      setMessage("")
+
+      // Si la imagen tiene un _id (está en la base de datos), eliminarla mediante la API
+      if (image.id) {
+
+        const response = await fetch("/api/admin/ipalee-config", {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ imageId: image.id }),
+        })
+
+        if (!response.ok) {
+          const errorData = await response.json()
+          throw new Error(errorData.message || `Error del servidor: ${response.status}`)
+        }
+
+        const data = await response.json()
+
+        if (!data.success) {
+          throw new Error(data.message || "Error al eliminar la imagen")
+        }
+
+        // Actualizar el estado local eliminando la imagen
+        setImages((prevImages) => prevImages.filter((img) => img.id !== image.id))
+        setMessageType("success")
+        setMessage("Imagen eliminada correctamente")
+
+        // Forzar una revalidación para asegurar que los datos estén actualizados
+        router.refresh()
+
+        // Recargar las imágenes para asegurarnos de que los cambios se reflejen
+        setTimeout(() => {
+          fetchImages()
+        }, 500)
+      } else {
+        // Si la imagen no tiene _id, solo eliminarla del estado local
+        setImages((prevImages) => prevImages.filter((img) => img.id !== image.id))
+        setMessageType("success")
+        setMessage("Imagen eliminada del estado local")
+      }
+
+      setTimeout(() => setMessage(""), 3000)
+    } catch (error) {
+      console.error("Error al eliminar la imagen:", error)
+      setMessageType("error")
+      setMessage(error instanceof Error ? error.message : "Error al eliminar la imagen")
+      setTimeout(() => setMessage(""), 3000)
+    } finally {
+      setIsDeleting(false)
+      setDeletingImageId(null)
+    }
   }
 
   const handleMoveImage = (id: string, direction: "up" | "down") => {
@@ -152,7 +214,10 @@ export default function AdminIpaleePage() {
     try {
       const response = await fetch("/api/admin/ipalee-config", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "no-cache",
+        },
         body: JSON.stringify({ images }),
       })
       if (response.ok) {
@@ -160,6 +225,11 @@ export default function AdminIpaleePage() {
         setMessage("Configuración guardada con éxito")
         setTimeout(() => setMessage(""), 3000)
         router.refresh()
+
+        // Recargar las imágenes para asegurarnos de que los cambios se reflejen
+        setTimeout(() => {
+          fetchImages()
+        }, 500)
       } else {
         throw new Error("Error al guardar la configuración")
       }
@@ -321,7 +391,7 @@ export default function AdminIpaleePage() {
                             variant="outline"
                             size="sm"
                             onClick={() => handleMoveImage(image.id, "up")}
-                            disabled={image.order === 0}
+                            disabled={image.order === 0 || isDeleting}
                             className="flex-1"
                           >
                             <ArrowUp className="h-4 w-4" />
@@ -330,15 +400,26 @@ export default function AdminIpaleePage() {
                             variant="outline"
                             size="sm"
                             onClick={() => handleMoveImage(image.id, "down")}
-                            disabled={image.order === images.length - 1}
+                            disabled={image.order === images.length - 1 || isDeleting}
                             className="flex-1"
                           >
                             <ArrowDown className="h-4 w-4" />
                           </Button>
+
+                          {/* Cada imagen tiene su propio AlertDialog */}
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
-                              <Button variant="destructive" size="sm" className="flex-1">
-                                <Trash2 className="h-4 w-4" />
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                className="flex-1"
+                                disabled={isDeleting && deletingImageId === image.id}
+                              >
+                                {isDeleting && deletingImageId === image.id ? (
+                                  <RefreshCw className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  <Trash2 className="h-4 w-4" />
+                                )}
                               </Button>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
@@ -350,7 +431,11 @@ export default function AdminIpaleePage() {
                               </AlertDialogHeader>
                               <AlertDialogFooter>
                                 <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => handleDeleteImage(image.id)}>
+                                <AlertDialogAction
+                                  onClick={() => {
+                                    handleDeleteImage(image)
+                                  }}
+                                >
                                   Eliminar
                                 </AlertDialogAction>
                               </AlertDialogFooter>

@@ -1,21 +1,26 @@
 "use client"
 
+import type React from "react"
+
 import { useState, useEffect } from "react"
 import Image from "next/image"
-import { X } from "lucide-react"
-import { motion, AnimatePresence } from "framer-motion"
-import { useAppContext } from "@/contexts/AppContext"
+import { motion } from "framer-motion"
+import { Heart, MessageCircle, Send, Bookmark, MoreHorizontal, User, X, ChevronLeft, ChevronRight } from "lucide-react"
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 
 interface IpaleeImage {
   id: string
   url: string
   order: number
+  _id?: string
 }
 
 export default function Ipalee() {
-  const [selectedImage, setSelectedImage] = useState<string | null>(null)
-  const { theme } = useAppContext()
   const [images, setImages] = useState<IpaleeImage[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [likedPosts, setLikedPosts] = useState<Record<string, boolean>>({})
+  const [selectedImage, setSelectedImage] = useState<IpaleeImage | null>(null)
+  const [lightboxOpen, setLightboxOpen] = useState(false)
 
   useEffect(() => {
     const fetchImages = async () => {
@@ -23,98 +28,270 @@ export default function Ipalee() {
         const response = await fetch("/api/admin/ipalee-config")
         if (response.ok) {
           const data = await response.json()
-          setImages(data.images)
+          console.log("Datos de Ipalee recibidos:", data)
+
+          // Asegurarnos de que data.config.images existe y es un array
+          const imagesData = data.config?.images || []
+          setImages(imagesData)
+        } else {
+          console.error("Error al cargar las imágenes de Ipalee")
         }
       } catch (error) {
         console.error("Error fetching ipalee images:", error)
+      } finally {
+        setIsLoading(false)
       }
     }
+
     fetchImages()
   }, [])
 
-  return (
-    <section id="ipalee" className={`py-20 ${theme === "dark" ? "bg-gray-900" : "bg-white"}`}>
-      <div className="container mx-auto">
-        <div
-          className={`${
-            theme === "dark"
-              ? "bg-gradient-to-r from-blue-900 to-purple-900"
-              : "bg-gradient-to-r from-primary to-secondary"
-          } text-white p-6 rounded-lg mb-12 text-center shadow-lg transform transition-all duration-300 hover:scale-105 flex items-center justify-between`}
-        >
-          <h2 className="text-3xl font-bold">
-            <span>Jovenes </span>
-            <span className={`${theme === "dark" ? "text-blue-300" : "text-white"}`}>
-              {Array.from("Ipalee").map((letter, index) => (
-                <span key={index} className="inline-block animate-bounce" style={{ animationDelay: `${index * 0.1}s` }}>
-                  {letter}
-                </span>
-              ))}
-            </span>
-          </h2>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-          {images.map((image) => (
-            <motion.div
-              key={image.id}
-              className={`aspect-square overflow-hidden rounded-lg shadow-lg cursor-pointer ${
-                theme === "dark" ? "bg-gray-800" : "bg-gray-100"
-              }`}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Image
-                src={image.url || "/placeholder.svg"}
-                alt={`Ipalee ${image.order + 1}`}
-                width={300}
-                height={300}
-                className="w-full h-full object-cover"
-                onClick={() => setSelectedImage(image.url)}
-                loading="lazy"
-              />
-            </motion.div>
-          ))}
-        </div>
+  // Función para manejar los likes
+  const handleLike = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation() // Evitar que se abra el lightbox
+    setLikedPosts((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }))
+  }
 
-        <AnimatePresence>
-          {selectedImage && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
-              onClick={() => setSelectedImage(null)}
-            >
-              <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.9, opacity: 0 }}
-                className="relative max-w-4xl w-full"
-              >
-                <Image
-                  src={selectedImage || "/placeholder.svg"}
-                  alt="Enlarged Ipalee image"
-                  width={1200}
-                  height={1200}
-                  className="max-w-full max-h-[90vh] object-contain rounded-lg"
-                />
-                <button
-                  className={`absolute top-2 right-2 text-white ${
-                    theme === "dark" ? "bg-gray-800" : "bg-black"
-                  } bg-opacity-50 p-2 rounded-full hover:bg-opacity-75 transition-colors duration-300`}
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    setSelectedImage(null)
-                  }}
-                >
-                  <X size={24} />
-                </button>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+  // Función para abrir el lightbox
+  const openLightbox = (image: IpaleeImage) => {
+    setSelectedImage(image)
+    setLightboxOpen(true)
+  }
+
+  // Función para cerrar el lightbox
+  const closeLightbox = () => {
+    setLightboxOpen(false)
+    setTimeout(() => setSelectedImage(null), 300) // Esperar a que termine la animación
+  }
+
+  // Función para navegar a la imagen anterior
+  const goToPrevious = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (!selectedImage) return
+
+    const sortedImages = [...images].sort((a, b) => a.order - b.order)
+    const currentIndex = sortedImages.findIndex((img) => img.id === selectedImage.id)
+
+    if (currentIndex > 0) {
+      setSelectedImage(sortedImages[currentIndex - 1])
+    } else {
+      // Ir al último si estamos en el primero (circular)
+      setSelectedImage(sortedImages[sortedImages.length - 1])
+    }
+  }
+
+  // Función para navegar a la imagen siguiente
+  const goToNext = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (!selectedImage) return
+
+    const sortedImages = [...images].sort((a, b) => a.order - b.order)
+    const currentIndex = sortedImages.findIndex((img) => img.id === selectedImage.id)
+
+    if (currentIndex < sortedImages.length - 1) {
+      setSelectedImage(sortedImages[currentIndex + 1])
+    } else {
+      // Ir al primero si estamos en el último (circular)
+      setSelectedImage(sortedImages[0])
+    }
+  }
+
+  // Animaciones
+  const staggerContainer = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  }
+
+  const fadeInUp = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.6,
+        ease: "easeOut",
+      },
+    },
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center py-20">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-pink-500"></div>
       </div>
-    </section>
+    )
+  }
+
+  // Si no hay imágenes, mostrar un mensaje o retornar null
+  if (!images || images.length === 0) {
+    return (
+      <div className="container mx-auto py-16 text-center">
+        <h2 className="text-2xl font-bold mb-4">Sección Ipalee</h2>
+        <p className="text-gray-600">No hay imágenes disponibles en este momento.</p>
+      </div>
+    )
+  }
+
+  // Ordenar las imágenes por el campo order
+  const sortedImages = [...images].sort((a, b) => a.order - b.order)
+
+  // Generar nombres aleatorios para los posts
+  const usernames = ["ipalee_oficial", "jovenes_ipalee", "ipalee_community", "ipalee_youth", "ipalee_moments"]
+
+  return (
+    <>
+      <section id="ipalee" className="py-16 bg-gray-50 dark:bg-gray-900">
+        <div className="container mx-auto px-4">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.2 }}
+            variants={fadeInUp}
+            className="text-center mb-12"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Jóvenes Ipalee</h2>
+            <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+              Conoce a nuestros jóvenes y sus actividades en la comunidad.
+            </p>
+          </motion.div>
+
+          <motion.div
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.1 }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
+            {sortedImages.map((image, index) => (
+              <motion.div
+                key={image.id}
+                variants={fadeInUp}
+                className="bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-md border border-gray-200 dark:border-gray-700"
+              >
+                {/* Header del post */}
+                <div className="flex items-center justify-between p-3 border-b border-gray-200 dark:border-gray-700">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-yellow-400 to-pink-600 flex items-center justify-center">
+                      <div className="w-7 h-7 rounded-full bg-white dark:bg-gray-800 flex items-center justify-center">
+                        <User className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+                      </div>
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm">{usernames[index % usernames.length]}</p>
+                      <p className="text-xs text-gray-500">Ipalee</p>
+                    </div>
+                  </div>
+                  <button className="text-gray-500">
+                    <MoreHorizontal className="w-5 h-5" />
+                  </button>
+                </div>
+
+                {/* Imagen (clickeable) */}
+                <div className="relative aspect-square cursor-pointer" onClick={() => openLightbox(image)}>
+                  <Image
+                    src={image.url || "/placeholder.svg"}
+                    alt="Jóvenes Ipalee"
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  />
+                </div>
+
+                {/* Acciones */}
+                <div className="p-3">
+                  <div className="flex justify-between mb-2">
+                    <div className="flex space-x-4">
+                      <button
+                        onClick={(e) => handleLike(image.id, e)}
+                        className={`transition-colors ${likedPosts[image.id] ? "text-red-500" : "text-gray-700 dark:text-gray-300"}`}
+                      >
+                        <Heart className={`w-6 h-6 ${likedPosts[image.id] ? "fill-red-500" : ""}`} />
+                      </button>
+                      <button className="text-gray-700 dark:text-gray-300">
+                        <MessageCircle className="w-6 h-6" />
+                      </button>
+                      <button className="text-gray-700 dark:text-gray-300">
+                        <Send className="w-6 h-6" />
+                      </button>
+                    </div>
+                    <button className="text-gray-700 dark:text-gray-300">
+                      <Bookmark className="w-6 h-6" />
+                    </button>
+                  </div>
+
+                  {/* Likes */}
+                  <p className="font-medium text-sm mb-1">{Math.floor(Math.random() * 100) + 10} me gusta</p>
+
+                  {/* Caption */}
+                  <div className="text-sm">
+                    <span className="font-medium mr-1">{usernames[index % usernames.length]}</span>
+                    <span className="text-gray-700 dark:text-gray-300">
+                      Momentos especiales con nuestros jóvenes Ipalee. #ipalee #juventud #comunidad
+                    </span>
+                  </div>
+
+                  {/* Timestamp */}
+                  <p className="text-xs text-gray-500 mt-1">HACE {Math.floor(Math.random() * 23) + 1} HORAS</p>
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Lightbox para ver imágenes a pantalla completa */}
+      <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
+        <DialogContent className="max-w-screen-lg w-[95vw] h-[90vh] p-0 bg-black/90 border-none">
+          <DialogTitle className="sr-only">Imagen de Jóvenes Ipalee</DialogTitle>
+          <div className="relative w-full h-full flex items-center justify-center">
+            {/* Botón para cerrar */}
+            <button
+              onClick={closeLightbox}
+              className="absolute top-4 right-4 z-50 text-white bg-black/50 rounded-full p-1 hover:bg-black/70 transition-colors"
+            >
+              <X className="w-6 h-6" />
+            </button>
+
+            {/* Botón para ir a la imagen anterior */}
+            <button
+              onClick={goToPrevious}
+              className="absolute left-4 z-40 text-white bg-black/50 rounded-full p-1 hover:bg-black/70 transition-colors"
+            >
+              <ChevronLeft className="w-8 h-8" />
+            </button>
+
+            {/* Imagen a pantalla completa */}
+            {selectedImage && (
+              <div className="relative w-full h-full flex items-center justify-center">
+                <Image
+                  src={selectedImage.url || "/placeholder.svg"}
+                  alt="Jóvenes Ipalee"
+                  fill
+                  className="object-contain"
+                  sizes="100vw"
+                />
+              </div>
+            )}
+
+            {/* Botón para ir a la imagen siguiente */}
+            <button
+              onClick={goToNext}
+              className="absolute right-4 z-40 text-white bg-black/50 rounded-full p-1 hover:bg-black/70 transition-colors"
+            >
+              <ChevronRight className="w-8 h-8" />
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }
 
