@@ -2,16 +2,13 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Share2 } from 'lucide-react'
 import { BlogPost } from '@/types/blog'
-import { ShareButtons } from './ShareButtons'
 import { ImageCarousel } from './ImageCarousel'
 import { useAppContext } from '@/contexts/AppContext'
 
 export default function Blog() {
   const [blogPosts, setBlogPosts] = useState<BlogPost[]>([])
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null)
-  const [isShareMenuOpen, setIsShareMenuOpen] = useState(false)
   const { theme } = useAppContext()
 
   useEffect(() => {
@@ -26,17 +23,13 @@ export default function Blog() {
 
   const openPost = (post: BlogPost) => {
     setSelectedPost(post)
-    setIsShareMenuOpen(false)
   }
 
   const closePost = () => {
     setSelectedPost(null)
-    setIsShareMenuOpen(false)
   }
 
-  const toggleShareMenu = () => {
-    setIsShareMenuOpen(!isShareMenuOpen)
-  }
+ 
 
   return (
     <section id="blog" className={`py-20 px-2 sm:px-4 ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'}`}>
@@ -71,7 +64,6 @@ export default function Blog() {
                   >
                     Leer más
                   </button>
-                  <ShareButtons post={post} />
                 </div>
               </div>
             </motion.div>
@@ -103,23 +95,8 @@ export default function Blog() {
                 <h2 className={`text-xl sm:text-2xl font-bold ${theme === 'dark' ? 'text-gray-100' : 'text-primary'}`}>
                   {selectedPost.title}
                 </h2>
-                <button
-                  onClick={toggleShareMenu}
-                  className={`p-2 rounded-full transition-colors duration-300 ${
-                    theme === 'dark'
-                      ? 'bg-blue-600 text-white hover:bg-blue-700'
-                      : 'bg-primary text-white hover:bg-primary-dark'
-                  }`}
-                  aria-label="Compartir artículo"
-                >
-                  <Share2 size={20} />
-                </button>
               </div>
-              {isShareMenuOpen && (
-                <div className="mb-4">
-                  <ShareButtons post={selectedPost} />
-                </div>
-              )}
+            
               <ImageCarousel images={selectedPost.images} inModal={true} />
               <div
                 className={`mt-6 overflow-y-auto max-h-[60vh] ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}

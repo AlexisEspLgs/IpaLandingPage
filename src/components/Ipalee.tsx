@@ -5,13 +5,27 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import { motion } from "framer-motion"
-import { Heart, MessageCircle, Send, Bookmark, MoreHorizontal, User, X, ChevronLeft, ChevronRight } from "lucide-react"
+import {
+  Heart,
+  MessageCircle,
+  Send,
+  Bookmark,
+  MoreHorizontal,
+  User,
+  X,
+  ChevronLeft,
+  ChevronRight,
+  Instagram,
+  ExternalLink,
+} from "lucide-react"
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
 
 interface IpaleeImage {
   id: string
   url: string
   order: number
+  instagramUrl?: string
   _id?: string
 }
 
@@ -99,6 +113,14 @@ export default function Ipalee() {
     }
   }
 
+  // Función para abrir enlace de Instagram
+  const openInstagramLink = (url: string, e: React.MouseEvent) => {
+    e.stopPropagation() // Evitar que se abra el lightbox
+    if (url) {
+      window.open(url, "_blank", "noopener,noreferrer")
+    }
+  }
+
   // Animaciones
   const staggerContainer = {
     hidden: { opacity: 0 },
@@ -125,7 +147,7 @@ export default function Ipalee() {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center py-20">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-pink-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-pink-500 dark:border-pink-400"></div>
       </div>
     )
   }
@@ -135,7 +157,7 @@ export default function Ipalee() {
     return (
       <div className="container mx-auto py-16 text-center">
         <h2 className="text-2xl font-bold mb-4">Sección Ipalee</h2>
-        <p className="text-gray-600">No hay imágenes disponibles en este momento.</p>
+        <p className="text-gray-600 dark:text-gray-300">No hay imágenes disponibles en este momento.</p>
       </div>
     )
   }
@@ -158,7 +180,7 @@ export default function Ipalee() {
             className="text-center mb-12"
           >
             <h2 className="text-3xl md:text-4xl font-bold mb-4">Jóvenes Ipalee</h2>
-            <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+            <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
               Conoce a nuestros jóvenes y sus actividades en la comunidad.
             </p>
           </motion.div>
@@ -186,10 +208,10 @@ export default function Ipalee() {
                     </div>
                     <div>
                       <p className="font-medium text-sm">{usernames[index % usernames.length]}</p>
-                      <p className="text-xs text-gray-500">Ipalee</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Ipalee</p>
                     </div>
                   </div>
-                  <button className="text-gray-500">
+                  <button className="text-gray-500 dark:text-gray-400">
                     <MoreHorizontal className="w-5 h-5" />
                   </button>
                 </div>
@@ -239,7 +261,22 @@ export default function Ipalee() {
                   </div>
 
                   {/* Timestamp */}
-                  <p className="text-xs text-gray-500 mt-1">HACE {Math.floor(Math.random() * 23) + 1} HORAS</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 mb-3">
+                    HACE {Math.floor(Math.random() * 23) + 1} HORAS
+                  </p>
+
+                  {/* Botón Ver en Instagram */}
+                  {image.instagramUrl && (
+                    <Button
+                      onClick={(e) => openInstagramLink(image.instagramUrl || "", e)}
+                      className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 dark:from-purple-600 dark:to-pink-600 dark:hover:from-purple-700 dark:hover:to-pink-700 text-white"
+                      size="sm"
+                    >
+                      <Instagram className="h-4 w-4 mr-2" />
+                      Ver en Instagram
+                      <ExternalLink className="h-3 w-3 ml-1" />
+                    </Button>
+                  )}
                 </div>
               </motion.div>
             ))}
@@ -278,6 +315,20 @@ export default function Ipalee() {
                   className="object-contain"
                   sizes="100vw"
                 />
+
+                {/* Botón Ver en Instagram en el lightbox */}
+                {selectedImage.instagramUrl && (
+                  <div className="absolute bottom-4 z-40">
+                    <Button
+                      onClick={(e) => openInstagramLink(selectedImage.instagramUrl || "", e)}
+                      className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+                    >
+                      <Instagram className="h-4 w-4 mr-2" />
+                      Ver en Instagram
+                      <ExternalLink className="h-3 w-3 ml-1" />
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
 
