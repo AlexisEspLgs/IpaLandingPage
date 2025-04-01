@@ -1,5 +1,4 @@
-"use client"
-
+'use client'
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { useRouter, usePathname } from "next/navigation"
@@ -22,11 +21,57 @@ import {
   X,
   ArrowLeft,
   Star,
+  ChevronDown,
+  ChevronRight,
+  Video,
 } from "lucide-react"
 import { useAuth } from "@/contexts/AuthContext"
 import { useAppContext } from "@/contexts/AppContext"
 import type React from "react"
 import { motion, AnimatePresence } from "framer-motion"
+
+// Definir la estructura del menú con secciones
+const menuSections = {
+  principal: {
+    label: "Principal",
+    items: [
+      { icon: Home, label: "Dashboard", href: "/admin/dashboard" },
+      { icon: Users, label: "Usuarios", href: "/admin/users" },
+    ]
+  },
+  contenido: {
+    label: "Contenido",
+    items: [
+      { icon: CogIcon, label: "Inicio", href: "/admin/inicio" },
+      { icon: TextQuote, label: "Historia", href: "/admin/historia" },
+      { icon: BookImageIcon, label: "Ipalee", href: "/admin/ipalee" },
+      { icon: LucideFileVideo, label: "TikTok", href: "/admin/tiktok" },
+      { icon: FileText, label: "Blogs", href: "/admin/blog" },
+    ]
+  },
+  multimedia: {
+    label: "Multimedia",
+    items: [
+      { icon: ImageIcon, label: "Carousel Imagenes", href: "/admin/carousel" },
+      { icon: Video, label: "Configurar En Vivo !", href: "/admin/facebook-live" },
+    ]
+  },
+  comunicacion: {
+    label: "Comunicación",
+    items: [
+      { icon: Bell, label: "News Popup", href: "/admin/news-popup" },
+      { icon: Star, label: "NewsLetter", href: "/admin/newsletter" },
+      { icon: Mail, label: "Suscripciones", href: "/admin/subscriptions" },
+    ]
+  },
+  configuracion: {
+    label: "Configuración",
+    items: [
+      { icon: FooterIcon, label: "Footer", href: "/admin/footer" },
+      { icon: Settings, label: "Configuracion", href: "/admin/settings" },
+    ]
+  }
+}
 
 export default function AdminLayout({
   children,
@@ -39,6 +84,7 @@ export default function AdminLayout({
   const pathname = usePathname()
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [isMobile, setIsMobile] = useState(false)
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({})
 
   // Detectar si es dispositivo móvil
   useEffect(() => {
@@ -78,6 +124,13 @@ export default function AdminLayout({
     }
   }
 
+  const toggleSection = (sectionKey: string) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [sectionKey]: !prev[sectionKey]
+    }))
+  }
+
   if (loading) {
     return (
       <motion.div
@@ -106,22 +159,6 @@ export default function AdminLayout({
     return null
   }
 
-  const menuItems = [
-    { icon: Home, label: "Dashboard", href: "/admin/dashboard" },
-    { icon: Users, label: "Usuarios", href: "/admin/users" },
-    { icon: CogIcon, label: "Inicio", href: "/admin/inicio" },
-    { icon: TextQuote, label: "Historia", href: "/admin/historia" },
-    { icon: BookImageIcon, label: "Ipalee", href: "/admin/ipalee" },
-    { icon: LucideFileVideo, label: "TikTok", href: "/admin/tiktok" },
-    { icon: FileText, label: "Blogs", href: "/admin/blog" },
-    { icon: ImageIcon, label: "Carousel Imagenes", href: "/admin/carousel" },
-    { icon: Bell, label: "News Popup", href: "/admin/news-popup" },
-    { icon: Star, label: "News-Letter", href: "/admin/newsletter" },
-    { icon: Mail, label: "Suscripciones", href: "/admin/subscriptions" },
-    { icon: FooterIcon, label: "Footer", href: "/admin/footer" },
-    { icon: Settings, label: "Configuracion", href: "/admin/settings" },
-  ]
-
   if (pathname === "/admin") {
     return <>{children}</>
   }
@@ -148,10 +185,10 @@ export default function AdminLayout({
             exit={isMobile ? { x: -280 } : { x: 0 }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
             className={`${
-              isMobile ? "fixed left-0 top-0 bottom-0 z-30 w-[260px] shadow-xl" : "w-56 relative"
+              isMobile ? "fixed left-0 top-0 bottom-0 z-30 w-[280px] shadow-xl" : "w-64 relative"
             } ${theme === "dark" ? "bg-gray-800" : "bg-white"} flex flex-col h-full`}
           >
-            <div className="flex items-center justify-between p-3 border-b border-gray-700">
+            <div className="flex items-center justify-between p-4 border-b border-gray-700">
               <h2 className={`text-lg font-bold ${theme === "dark" ? "text-gray-200" : "text-gray-800"}`}>
                 Admin Panel
               </h2>
@@ -167,49 +204,71 @@ export default function AdminLayout({
               )}
             </div>
 
-            {/* Scrollable menu */}
+            {/* Scrollable menu with sections */}
             <div className="flex-1 overflow-y-auto py-2">
-              <nav className="space-y-1 px-2">
-                {menuItems.map((item, index) => (
-                  <motion.div
-                    key={item.href}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.03 }}
-                  >
-                    <Link href={item.href}>
-                      <div
-                        className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
-                          pathname === item.href
-                            ? theme === "dark"
-                              ? "bg-gray-700 text-white"
-                              : "bg-blue-50 text-blue-700"
-                            : theme === "dark"
-                              ? "text-gray-300 hover:bg-gray-700 hover:text-white"
-                              : "text-gray-700 hover:bg-gray-100"
-                        }`}
-                      >
-                        <item.icon
-                          className={`flex-shrink-0 h-4 w-4 mr-2 ${
-                            pathname === item.href
-                              ? theme === "dark"
-                                ? "text-white"
-                                : "text-blue-700"
-                              : theme === "dark"
-                                ? "text-gray-400"
-                                : "text-gray-500"
-                          }`}
-                        />
-                        <span>{item.label}</span>
-                      </div>
-                    </Link>
-                  </motion.div>
+              <nav className="space-y-1">
+                {Object.entries(menuSections).map(([sectionKey, section]) => (
+                  <div key={sectionKey} className="px-2">
+                    <button
+                      onClick={() => toggleSection(sectionKey)}
+                      className={`w-full flex items-center justify-between px-3 py-2 text-sm font-medium transition-colors duration-200 ${
+                        theme === "dark"
+                          ? "text-gray-300 hover:bg-gray-700"
+                          : "text-gray-700 hover:bg-gray-100"
+                      }`}
+                    >
+                      <span>{section.label}</span>
+                      {expandedSections[sectionKey] ? (
+                        <ChevronDown className="h-4 w-4" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4" />
+                      )}
+                    </button>
+                    <AnimatePresence>
+                      {expandedSections[sectionKey] && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.2 }}
+                          className="overflow-hidden"
+                        >
+                          {section.items.map((item) => (
+                            <Link key={item.href} href={item.href}>
+                              <div
+                                className={`flex items-center px-6 py-2 text-sm font-medium transition-colors duration-200 ${
+                                  pathname === item.href
+                                    ? theme === "dark"
+                                      ? "bg-gray-700 text-white"
+                                      : "bg-blue-50 text-blue-700"
+                                    : theme === "dark"
+                                    ? "text-gray-300 hover:bg-gray-700 hover:text-white"
+                                    : "text-gray-700 hover:bg-gray-100"
+                                }`}
+                              >
+                                <item.icon className={`h-4 w-4 mr-2 ${
+                                  pathname === item.href
+                                    ? theme === "dark"
+                                      ? "text-white"
+                                      : "text-blue-700"
+                                    : theme === "dark"
+                                    ? "text-gray-400"
+                                    : "text-gray-500"
+                                }`} />
+                                <span>{item.label}</span>
+                              </div>
+                            </Link>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
                 ))}
               </nav>
             </div>
 
             {/* Logout button */}
-            <div className="p-3 border-t border-gray-700">
+            <div className="p-4 border-t border-gray-700">
               <Button
                 onClick={handleLogout}
                 className="w-full bg-red-500 hover:bg-red-600 text-white transition-all duration-200"
@@ -270,7 +329,7 @@ export default function AdminLayout({
           </div>
         </div>
 
-        {/* Page content - eliminado el padding extra para usar todo el espacio */}
+        {/* Page content */}
         <main
           className={`flex-1 overflow-y-auto ${theme === "dark" ? "bg-gray-900 text-gray-100" : "bg-gray-100 text-gray-900"}`}
         >
@@ -324,4 +383,3 @@ export default function AdminLayout({
     </div>
   )
 }
-
