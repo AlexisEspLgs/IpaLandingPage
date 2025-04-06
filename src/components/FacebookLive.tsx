@@ -63,7 +63,6 @@ export default function FacebookLive() {
     const now = new Date()
 
     if (now >= expirationDate && !hasEnded) {
-      console.log("La transmisión ha finalizado")
       setHasEnded(true)
       setEndTime(expirationDate)
     }
@@ -86,7 +85,6 @@ export default function FacebookLive() {
 
   const fetchConfig = async () => {
     try {
-      console.log("Fetching Facebook Live config...")
       const response = await fetch("/api/admin/facebook-live")
 
       if (!response.ok) {
@@ -94,11 +92,9 @@ export default function FacebookLive() {
       }
 
       const data = await response.json()
-      console.log("Facebook Live data received:", data)
 
       // Verificar si el directo está activo
       if (data.config && data.config.active && data.config.embedCode) {
-        console.log("Facebook Live config is active")
         setConfig(data.config)
 
         // Verificar si ha expirado
@@ -107,7 +103,6 @@ export default function FacebookLive() {
           const now = new Date()
 
           if (now >= expirationDate) {
-            console.log("La transmisión ha finalizado por fecha de expiración")
             setHasEnded(true)
             setEndTime(expirationDate)
           } else {
@@ -115,12 +110,10 @@ export default function FacebookLive() {
           }
         }
       } else {
-        console.log("Facebook Live is not active or has no embed code")
         setConfig(null)
       }
       setError(null)
     } catch (error) {
-      console.error("Error fetching Facebook Live config:", error)
       setError(error instanceof Error ? error.message : "Error desconocido")
       setConfig(null)
     } finally {
@@ -141,7 +134,6 @@ export default function FacebookLive() {
 
   // Si está cargando, mostrar un indicador de carga
   if (isLoading) {
-    console.log("Facebook Live component is loading...")
     return null
   }
 
@@ -154,7 +146,6 @@ export default function FacebookLive() {
     return null
   }
 
-  console.log("Rendering Facebook Live component, hasEnded:", hasEnded)
 
   // Función para renderizar el código de incrustación de forma segura
   const renderEmbedCode = () => {
