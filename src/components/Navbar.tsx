@@ -5,7 +5,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { useAppContext } from "@/contexts/AppContext"
 import { Switch } from "@/components/ui/switch"
-import { Sun, Moon } from "lucide-react"
+import { Sun, Moon } from 'lucide-react'
 
 interface NavbarProps {
   activeSection: string
@@ -116,7 +116,8 @@ export function Navbar({ activeSection, navItems, onNavItemClick }: NavbarProps)
   return (
     <header className={headerClasses}>
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-3 items-center py-4">
+        {/* Layout para escritorio usando grid */}
+        <div className="hidden md:grid grid-cols-3 items-center py-4">
           {/* Logo a la izquierda - 1/3 del espacio */}
           <div className={`${logoContainerClasses} col-span-1`}>
             <Link href="/">
@@ -134,7 +135,7 @@ export function Navbar({ activeSection, navItems, onNavItemClick }: NavbarProps)
           </div>
 
           {/* Menú perfectamente centrado - 1/3 del espacio */}
-          <div className="hidden md:flex justify-center items-center col-span-1">
+          <div className="flex justify-center items-center col-span-1">
             <nav className="flex items-center space-x-4 ml-8">
               {navItems.map((item) => (
                 <div key={item} className="relative group">
@@ -165,28 +166,50 @@ export function Navbar({ activeSection, navItems, onNavItemClick }: NavbarProps)
                 <Moon className="h-3.5 w-3.5 text-gray-400 dark:text-blue-400" />
               </div>
             </div>
-
-            {/* Botón de menú móvil */}
-            <button
-              onClick={() => setMenuOpen(!menuOpen)}
-              className={`md:hidden p-2 rounded-lg transition-all duration-300 ${
-                theme === "dark" ? "text-white hover:bg-gray-700/50" : "text-gray-700 hover:bg-gray-100/80"
-              }`}
-              aria-label="Toggle menu"
-            >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path d={menuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"}></path>
-              </svg>
-            </button>
           </div>
+        </div>
+
+        {/* Layout simplificado para móviles */}
+        <div className="md:hidden flex items-center py-4">
+          {/* Logo a la izquierda */}
+          <div className={logoContainerClasses}>
+            <Link href="/">
+              <div className="relative overflow-hidden rounded-full shadow-md hover:shadow-lg transition-all duration-300">
+                <Image
+                  src="/logo.jpg"
+                  alt="IPA Las Encinas Logo"
+                  width={40}
+                  height={40}
+                  className="cursor-pointer hover:scale-110 transition-transform duration-300"
+                  onDoubleClick={handleLogoDoubleClick}
+                />
+              </div>
+            </Link>
+          </div>
+          
+          {/* Espacio flexible en el medio */}
+          <div className="flex-1"></div>
+          
+          {/* Solo el botón de menú a la derecha */}
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            className={`p-2 rounded-lg transition-all duration-300 ${
+              theme === "dark" ? "text-white hover:bg-gray-700/50" : "text-gray-700 hover:bg-gray-100/80"
+            }`}
+            aria-label="Toggle menu"
+          >
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path d={menuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"}></path>
+            </svg>
+          </button>
         </div>
 
         {/* Menú móvil */}
@@ -222,15 +245,17 @@ export function Navbar({ activeSection, navItems, onNavItemClick }: NavbarProps)
 
               {/* Theme Toggle en menú móvil */}
               <div className="px-4 py-3">
-                <div className="flex items-center justify-center space-x-2 bg-white/20 dark:bg-gray-800/20 backdrop-blur-md p-2 rounded-lg border border-white/30 dark:border-gray-700/30 shadow-sm">
-                  <Sun className="h-4 w-4 text-yellow-500 dark:text-gray-400" />
-                  <Switch
-                    checked={theme === "dark"}
-                    onCheckedChange={handleThemeChange}
-                    className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-gray-200"
-                  />
-                  <Moon className="h-4 w-4 text-gray-400 dark:text-blue-400" />
-                  <span className="text-sm ml-2">{theme === "dark" ? "Modo oscuro" : "Modo claro"}</span>
+                <div className="flex items-center justify-between space-x-2 bg-white/20 dark:bg-gray-800/20 backdrop-blur-md p-2 rounded-lg border border-white/30 dark:border-gray-700/30 shadow-sm">
+                  <div className="flex items-center space-x-2">
+                    <Sun className="h-4 w-4 text-yellow-500 dark:text-gray-400" />
+                    <Switch
+                      checked={theme === "dark"}
+                      onCheckedChange={handleThemeChange}
+                      className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-gray-200"
+                    />
+                    <Moon className="h-4 w-4 text-gray-400 dark:text-blue-400" />
+                  </div>
+                  <span className="text-sm">{theme === "dark" ? "Modo oscuro" : "Modo claro"}</span>
                 </div>
               </div>
             </nav>
