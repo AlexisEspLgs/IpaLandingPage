@@ -6,8 +6,13 @@ export async function POST(request: Request) {
   const { idToken } = await request.json()
 
   try {
-    const expiresIn = 60 * 60 * 24 * 5 * 1000 // 5 days
+    const expiresIn = 60 * 60 * 24 * 1000 // 1 día en milisegundos
+    // Verifica el token de ID y crea una cookie de sesión
     const sessionCookie = await auth.createSessionCookie(idToken, { expiresIn })
+    if (!sessionCookie) {
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 })
+    }
+    // Configura la cookie de sesión
 
     // Asegúrate de esperar a que cookies() se resuelva
     const cookieStore = await cookies()
